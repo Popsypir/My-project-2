@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97269afb30aa84742ae3f3342603618a, type: 3}
+  m_Name: Phone Call Audio_ru
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.AssetTable
+  m_LocaleId:
+    m_Code: ru
+  m_SharedData: {fileID: 11400000, guid: ec4ba6ea06b1138478225881bf5354af, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 2143980371968
+    m_Localized: e32005d5a6dd2e141a1818e6703b99c2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2144068452352
+    m_Localized: f60ad270adb3a904cb256df1003b1985
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25036374163456
+    m_Localized: 0968c65f47650ba438e477f1d0084a52
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25036462243840
+    m_Localized: 68d2a85f93856f04c84adb5ef14e3610
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25036470632448
+    m_Localized: e28eaf6b9ef103947b2ccd1207cad64c
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

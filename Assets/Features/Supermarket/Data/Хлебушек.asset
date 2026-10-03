@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02469eddf1ca556478e99925c2a12426, type: 3}
+  m_Name: "\u0425\u043B\u0435\u0431\u0443\u0448\u0435\u043A"
+  m_EditorClassIdentifier: Assembly-CSharp::GamePhone.Shop.ShopItemData
+  ItemName: "\u0425\u043B\u0435\u0431\u0443\u0448\u0435\u043A"
+  Price: 100
+  ItemPrefab: {fileID: 7765520925071999604, guid: 75ee553f792c2d84eb4a9015602b5f18, type: 3}

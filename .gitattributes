@@ -1,0 +1,75 @@
+# Как git должен обращаться с разными типами файлов.
+#
+# Зачем он нужен: сцены, префабы и прочие ассеты Unity - это текст, и git
+# обязан понимать это одинаково на всех машинах. Иначе при разных настройках
+# переводов строк файл считается изменённым целиком, и вместо нормального
+# слияния получается конфликт во всём файле. Именно так в прошлый раз в
+# репозиторий попал мусор от слияния, из-за которого не собиралась сборка.
+
+# По умолчанию git сам определяет текст и нормализует переводы строк
+* text=auto
+
+# --- Текстовые форматы Unity (YAML) ---
+# Жёстко фиксируем перевод строки, чтобы Windows и прочие системы
+# не переписывали эти файлы целиком
+*.unity              text eol=lf
+*.prefab             text eol=lf
+*.asset              text eol=lf
+*.mat                text eol=lf
+*.anim               text eol=lf
+*.controller         text eol=lf
+*.overrideController text eol=lf
+*.physicMaterial     text eol=lf
+*.physicsMaterial    text eol=lf
+*.playable           text eol=lf
+*.mask               text eol=lf
+*.meta               text eol=lf
+*.cs                 text diff=csharp
+*.shader             text
+*.hlsl               text
+*.cginc              text
+*.json               text
+*.md                 text
+*.uss                text
+*.uxml               text
+
+# --- Бинарные файлы ---
+# Их нельзя ни сливать, ни трогать переводы строк - только заменять целиком
+*.fbx          binary
+*.blend        binary
+*.obj          binary
+*.png          binary
+*.jpg          binary
+*.jpeg         binary
+*.psd          binary
+*.tga          binary
+*.tif          binary
+*.exr          binary
+*.hdr          binary
+*.cubemap      binary
+*.wav          binary
+*.mp3          binary
+*.ogg          binary
+*.aif          binary
+*.ttf          binary
+*.otf          binary
+*.dll          binary
+*.so           binary
+*.dylib        binary
+*.pdf          binary
+*.unitypackage binary
+
+# --- Необязательно: умное слияние сцен ---
+# У Unity есть свой инструмент UnityYAMLMerge, который сливает сцены и префабы
+# по смыслу, а не построчно. Чтобы включить, выполни ОДИН РАЗ на своей машине
+# (путь подставь свой, версия редактора может отличаться):
+#
+#   git config --global merge.unityyamlmerge.name "Unity SmartMerge"
+#   git config --global merge.unityyamlmerge.driver "'C:/Program Files/Unity/Hub/Editor/6000.5.3f1/Editor/Data/Tools/UnityYAMLMerge.exe' merge -p %O %B %A %A"
+#
+# и ТОЛЬКО ПОСЛЕ ЭТОГО добавь сюда строки:
+#   *.unity  merge=unityyamlmerge
+#   *.prefab merge=unityyamlmerge
+#
+# Раньше времени добавлять нельзя: git будет ругаться на неизвестный драйвер
+# слияния у всех, кто его ещё не настроил.

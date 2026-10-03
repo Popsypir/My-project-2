@@ -1,0 +1,54 @@
+# Папки, которые Unity создаёт и пересобирает сама - коммитить их не нужно
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]serSettings/
+[Mm]emoryCaptures/
+
+# Файлы, которые IDE и Unity создают при открытии проекта
+.vs/
+.vscode/
+.idea/
+*.iml
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Мусор операционной системы
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Готовые сборки и пакеты - их место в разделе Releases, а не в репозитории.
+# Один такой файл легко весит больше, чем весь исходный проект.
+*.apk
+*.aab
+*.unitypackage
+*.app
+*.exe.stackdump
+[Ee]xported[Oo]bj/
+[Rr]ecordings/
+
+# Служебные файлы, остающиеся после сборки
+sysinfo.txt
+crashlytics-build.properties
+*.stackdump
+
+# Временные файлы после неудачного слияния
+*.orig
+*.rej
+*.bak
+*~

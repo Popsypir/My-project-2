@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Localization-Asset-Tables-Russian
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Localization-Asset-Tables-Russian
+  m_GUID: 1d63c518bf51f1141a01910e641935fc
+  m_SerializeEntries:
+  - m_GUID: 12d5a4823948aa94a884d5271abfdf9c
+    m_Address: Phone Call Audio_ru
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-ru
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 1
+  m_Settings: {fileID: 11400000, guid: e4af7feb536c01a4e837631d2fbbb500, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 7b479cdd9f70a104693e17d55be6dcbd, type: 2}
+    - {fileID: 11400000, guid: 6af48ecbeae0fbb4ab72f482fe2b13d4, type: 2}
+    - {fileID: 11400000, guid: dcc5edec7595a784588554d3e46a783e, type: 2}

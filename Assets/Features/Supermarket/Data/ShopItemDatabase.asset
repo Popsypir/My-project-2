@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ba8b2c1b7d1f0741b197e79623b6541, type: 3}
+  m_Name: ShopItemDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::GamePhone.Shop.ShopItemDatabase
+  AllItems:
+  - {fileID: 11400000, guid: 874e777e0f97eab419dcb9e439c8eb06, type: 2}
+  - {fileID: 11400000, guid: 768d7232952c7b54894408cb674b4ca1, type: 2}
+  - {fileID: 11400000, guid: 78894dfc393e7614d99f73f1d999466f, type: 2}
+  - {fileID: 11400000, guid: eef6ed8c1a54b0145ba56f0c80b8ec20, type: 2}
+  _minItemsPerCustomer: 5
+  _maxItemsPerCustomer: 10

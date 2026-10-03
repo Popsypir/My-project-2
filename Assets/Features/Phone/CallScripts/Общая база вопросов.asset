@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 871f7b3c23d18a5479fced8e7321b0e5, type: 3}
+  m_Name: "\u041E\u0431\u0449\u0430\u044F \u0431\u0430\u0437\u0430 \u0432\u043E\u043F\u0440\u043E\u0441\u043E\u0432"
+  m_EditorClassIdentifier: Assembly-CSharp::GamePhone.CallQuestionBank
+  Questions:
+  - Name: "\u0421\u043A\u043E\u043B\u044C\u043A\u043E \u0432\u0430\u043C \u043B\u0435\u0442"
+    Clip: {fileID: 8300000, guid: f60ad270adb3a904cb256df1003b1985, type: 3}
+    Choices:
+    - Digit: 1
+      Label: "\u041C\u0435\u043D\u044C\u0448\u0435 6"
+      ResponseClip: {fileID: 8300000, guid: 93710eb6339435c4c9eb829a39cd9a7f, type: 3}
+      Reject: 1
+    - Digit: 2
+      Label: "\u0411\u043E\u043B\u044C\u0448\u0435 6"
+      ResponseClip: {fileID: 8300000, guid: b537d125a97a26c4e9721308a27bd98a, type: 3}
+      Reject: 0
+    AnswerKey: "\u0432\u043E\u0437\u0440\u0430\u0441\u0442"
+    ChoiceTimeout: 10
+  - Name: "\u0423\u043C\u0435\u0435\u0442\u0435 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C\u0441\u044F \u044E\u0441\u043F\u043E\u043C"
+    Clip: {fileID: 8300000, guid: 68d2a85f93856f04c84adb5ef14e3610, type: 3}
+    Choices:
+    - Digit: 1
+      Label: "\u0432\u0430\u0440\u0438\u0430\u043D\u0442 1"
+      ResponseClip: {fileID: 0}
+      Reject: 1
+    - Digit: 2
+      Label: "\u0432\u0430\u0440\u0438\u0430\u043D\u0442 2"
+      ResponseClip: {fileID: 0}
+      Reject: 0
+    AnswerKey: "\u0443\u043C\u0435\u0435\u0442 \u044E\u0441\u043F"
+    ChoiceTimeout: 10
+  - Name: "\u0421\u043A\u043E\u043B\u044C\u043A\u043E \u0447\u0430\u0441\u043E\u0432 \u043F\u0435\u0440\u0435\u0434 \u0442\u0435\u043B\u0435\u0432\u0438\u0437\u043E\u0440\u043E\u043C"
+    Clip: {fileID: 8300000, guid: 0968c65f47650ba438e477f1d0084a52, type: 3}
+    Choices:
+    - Digit: 1
+      Label: "\u0432\u0430\u0440\u0438\u0430\u043D\u0442 1"
+      ResponseClip: {fileID: 0}
+      Reject: 1
+    - Digit: 2
+      Label: "\u0432\u0430\u0440\u0438\u0430\u043D\u0442 2"
+      ResponseClip: {fileID: 0}
+      Reject: 0
+    AnswerKey: "\u0447\u0430\u0441\u044B \u0443 \u0442\u0435\u043B\u0435\u0432\u0438\u0437\u043E\u0440\u0430"
+    ChoiceTimeout: 10

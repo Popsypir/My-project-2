@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: UI Text Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: UI Text
+  m_TableCollectionNameGuidString: b9f84e20df939d741b126625ae4519e2
+  m_Entries:
+  - m_Id: 1822059151360
+    m_Key: call.no_signal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1822134648832
+    m_Key: call.no_such_number
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1822138843136
+    m_Key: call.not_hiring_today
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1822138843137
+    m_Key: call.ended
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1822138843138
+    m_Key: call.cancelled
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1822138843139
+    m_Key: call.talking_timer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1822138843140
+    m_Key: call.no_teleport_service
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1822138843141
+    m_Key: call.teleport_failed
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 8499293588222378084
+  references:
+    version: 2
+    RefIds:
+    - rid: 8499293588222378084
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1790181228768
