@@ -5,8 +5,23 @@ using UnityEngine.SceneManagement;
 
 public class StartGameApp : MonoBehaviour
 {
+
     [Header("Сцена для загрузки")]
     public string targetSceneName = "Квартирка";
+
+    [Header("Меню подтверждения выхода из игры")]
+    [SerializeField] private CanvasGroup exitPanel;
+
+
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            exitPanel.alpha = 1;
+            exitPanel.interactable = true;
+            exitPanel.blocksRaycasts = true;
+        }
+    }
 
     public void LoadLocationByName(string sceneName)
     {
