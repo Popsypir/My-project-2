@@ -14,11 +14,11 @@ public class StartGameApp : MonoBehaviour
 
     [Header("Меню настроек")]
     [SerializeField] private CanvasGroup settingsPanel;
-
+    [SerializeField] private CanvasGroup MainMenuButtons;
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && settingsPanel.alpha != 1)
+        if (Input.GetKeyDown(KeyCode.Escape) && settingsPanel.alpha != 1 && MainMenuButtons.alpha != 0)
         {
             exitPanel.alpha = 1;
             exitPanel.interactable = true;
