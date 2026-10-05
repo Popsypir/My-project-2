@@ -18,11 +18,21 @@ public class StartGameApp : MonoBehaviour
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && settingsPanel.alpha != 1 && MainMenuButtons.alpha != 0)
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            exitPanel.alpha = 1;
-            exitPanel.interactable = true;
-            exitPanel.blocksRaycasts = true;
+            if (SceneManager.GetActiveScene().name == "Квартирка")
+            {
+                if (settingsPanel.alpha != 1 && MainMenuButtons.alpha != 0)
+                {
+                    exitPanel.alpha = 1;
+                    exitPanel.interactable = true;
+                    exitPanel.blocksRaycasts = true;
+                }
+            }
+            else
+            {
+                return;
+            }
         }
     }
 
