@@ -10,13 +10,14 @@ public class Settings : MonoBehaviour
     [SerializeField] private CanvasGroup settingsPanel;
     [SerializeField] private CanvasGroup MainMenuButtons;
     [SerializeField] private TextMeshProUGUI SettingsTextButton;
+    [SerializeField] private TextMeshProUGUI creditsTextButton;
     [SerializeField] private CanvasGroup Phone;
     [SerializeField] private CanvasGroup creditsPanel;
     [SerializeField] private GameObject SettingsButton;
 
     public void Choise()
     {
-        if (settingsPanel.alpha == 0 && creditsPanel.alpha != 1)
+        if (settingsPanel.alpha == 0)
         {
             OpenSettings();
         }
@@ -28,6 +29,14 @@ public class Settings : MonoBehaviour
 
     public void OpenSettings()
     {
+        if (creditsPanel.alpha == 1)
+        {
+            creditsPanel.alpha = 0;
+            creditsPanel.interactable = false;
+            creditsPanel.blocksRaycasts = false;
+            creditsTextButton.text = "ТИТРЫ";
+        }
+
         settingsPanel.alpha = 1.0f;
         settingsPanel.interactable = true;
         SettingsOpen = true;
@@ -71,9 +80,18 @@ public class Settings : MonoBehaviour
 
     private void Update()
     {
+        if (settingsPanel.alpha != 1)
+        {
+            SettingsOpen = false;
+        }
         if (SettingsOpen == true && EventSystem.current.currentSelectedGameObject != SettingsButton)
         {
             EventSystem.current.SetSelectedGameObject(SettingsButton);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape) && SettingsOpen == true)
+        {
+            CloseSettings();
         }
     }
 }

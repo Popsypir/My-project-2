@@ -8,6 +8,7 @@ public class Credits : MonoBehaviour
     [Header("Меню титров")]
     [SerializeField] private CanvasGroup creditsPanel;
     [SerializeField] private TextMeshProUGUI authorsTextButton;
+    [SerializeField] private TextMeshProUGUI settingsTextButton;
     [SerializeField] private CanvasGroup settingsPanel;
 
 
@@ -16,7 +17,7 @@ public class Credits : MonoBehaviour
 
     public void Choise()
     {
-        if (creditsPanel.alpha == 0 && settingsPanel.alpha != 1)
+        if (creditsPanel.alpha == 0)
         {
             OpenCredits();
         }
@@ -28,6 +29,14 @@ public class Credits : MonoBehaviour
 
     public void OpenCredits()
     {
+        if (settingsPanel.alpha == 1)
+        {
+            settingsPanel.alpha = 0;
+            settingsPanel.interactable = false;
+            settingsPanel.blocksRaycasts = false;
+            settingsTextButton.text = "НАСТРОЙКИ";
+
+        }
         creditsPanel.alpha = 1.0f;
         creditsPanel.interactable = true;
         creditsPanel.blocksRaycasts = true;
@@ -49,9 +58,18 @@ public class Credits : MonoBehaviour
 
     private void Update()
     {
+        if (creditsPanel.alpha != 1)
+        {
+            CreditsOpen = false;
+        }
         if (CreditsOpen == true && EventSystem.current.currentSelectedGameObject != CreditsButton)
         {
             EventSystem.current.SetSelectedGameObject(CreditsButton);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape) && CreditsOpen == true)
+        {
+            CloseCredits();
         }
     }
 }
