@@ -26,6 +26,10 @@ namespace GamePhone
         [SerializeField] private KeyCode _toggleKey = KeyCode.Escape;
         [SerializeField] private bool _handleInputInternally = true;
 
+
+    
+        [SerializeField] private CanvasGroup mainMenuButtons;
+
         // Позволяет снаружи временно заблокировать реакцию на _toggleKey (например,
         // пока поверх экрана показано своё окно паузы мини-игры - см. PongApp) -
         // чтобы повторный Escape не открывал телефон обратно сам по себе.
@@ -59,7 +63,10 @@ namespace GamePhone
         private void Update()
         {
             if (_handleInputInternally && _inputEnabled && Input.GetKeyDown(_toggleKey))
-                Toggle();
+                if (mainMenuButtons == null || mainMenuButtons.alpha != 1)
+                {
+                    Toggle();
+                }
         }
 
         // См. комментарий у _inputEnabled выше

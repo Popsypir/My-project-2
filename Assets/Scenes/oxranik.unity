@@ -5137,11 +5137,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3437871655503351136, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3437871655503351136, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8214813539719813082, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
       propertyPath: m_Name
       value: Phone
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1209532163146193810, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
