@@ -25,9 +25,9 @@ public class Settings : MonoBehaviour
         SettingsOpen = false;
     }
 
-    public void SetMainMenuMode(bool mode)
+    public void SetMainMenuMode()
     {
-        if (mode)
+        if (MainMenuButtons.alpha == 1)
         {
             MainMenuButtons.alpha = 0f;
             MainMenuButtons.interactable = false;
