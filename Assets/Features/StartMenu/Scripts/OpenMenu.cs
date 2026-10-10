@@ -27,24 +27,17 @@ public class OpenMenu : MonoBehaviour
         switch (index)
         {
             case 1:
-                if (_isSettingsOpen) { CloseSettings(); }
-                else
-                {
-                    CloseOtherMenus(1);
-                    OpenSettings();              
-                }     
+                if (_isSettingsOpen) { CloseSettings(); }       // Если настройки уже открыты - закрываем
+                else { CloseOtherMenus(1); OpenSettings(); }     // Производим закрытие остальных меню и открытие настроек
                 break;
             case 2:
-                if (_isCreditsOpen) { CloseCredits(); }
-                else 
-                {
-                    CloseOtherMenus(2);
-                    OpenCredits();                   
-                }         
+                if (_isCreditsOpen) { CloseCredits(); }     // аналогично с настройками
+                else { CloseOtherMenus(2); OpenCredits(); }         
                 break;
         }
     }
 
+// ----------------- Открытия, закрытия меню
     private void OpenSettings()
     {
         settingsPanel.alpha = 1.0f;
@@ -87,31 +80,29 @@ public class OpenMenu : MonoBehaviour
     {
         switch (index)
         {
-            case 1:
-                CloseCredits(); break;
-            case 2:
-                CloseSettings(); break;
+            case 1: CloseCredits(); break;   // Закрываем все остальные меню
+            case 2: CloseSettings(); break;
         }
     }
 
     private void Update()
     {
-        if (_isSettingsOpen || _isCreditsOpen)
+        if (_isSettingsOpen || _isCreditsOpen)  // Проверка на открыто ли хотя бы одно меню
         {
-            if (_isSettingsOpen && EventSystem.current.currentSelectedGameObject != SettingsButton)
-            {
+            if (_isSettingsOpen && EventSystem.current.currentSelectedGameObject != SettingsButton)        // Проверка на селект* кнопки (если она не селекнута* - селектим*) 
+            {                                                                                              // * - выбор от англ. select
                 EventSystem.current.SetSelectedGameObject(SettingsButton);
             }
 
-            if (_isCreditsOpen && EventSystem.current.currentSelectedGameObject != CreditsButton)
+            if (_isCreditsOpen && EventSystem.current.currentSelectedGameObject != CreditsButton)  // аналогично
             {
                 EventSystem.current.SetSelectedGameObject(CreditsButton);
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape) && (_isCreditsOpen || _isSettingsOpen))
+        if (Input.GetKeyDown(KeyCode.Escape) && (_isCreditsOpen || _isSettingsOpen)) // Если хотя бы одно меню открыто и нажата кнопка ESC
         {
-            if (_isSettingsOpen == true) { CloseSettings(); }
+            if (_isSettingsOpen == true) { CloseSettings(); }    // Проверка на конкретное меню и закрытие
             if (_isCreditsOpen == true) { CloseCredits(); }
         }
     }
