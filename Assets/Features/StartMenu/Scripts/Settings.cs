@@ -1,60 +1,12 @@
 using UnityEngine;
-using TMPro;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class Settings : MonoBehaviour
 {
-    private bool SettingsOpen = false;
-    [Header("Меню настроек")]
-    [SerializeField] private CanvasGroup settingsPanel;
+    [Header("Главное Меню")]
     [SerializeField] private CanvasGroup MainMenuButtons;
-    [SerializeField] private TextMeshProUGUI SettingsTextButton;
-    [SerializeField] private TextMeshProUGUI creditsTextButton;
+
+    [Header("Телефон")]
     [SerializeField] private CanvasGroup Phone;
-    [SerializeField] private CanvasGroup creditsPanel;
-    [SerializeField] private GameObject SettingsButton;
-
-    public void Choise()
-    {
-        if (settingsPanel.alpha == 0)
-        {
-            OpenSettings();
-        }
-        else
-        {
-            CloseSettings();
-        }
-    }
-
-    public void OpenSettings()
-    {
-        if (creditsPanel.alpha == 1)
-        {
-            creditsPanel.alpha = 0;
-            creditsPanel.interactable = false;
-            creditsPanel.blocksRaycasts = false;
-            creditsTextButton.text = "ТИТРЫ";
-        }
-
-        settingsPanel.alpha = 1.0f;
-        settingsPanel.interactable = true;
-        SettingsOpen = true;
-        settingsPanel.blocksRaycasts = true;
-
-        SettingsTextButton.text = "НАЗАД";
-    }
-
-    void CloseSettings()
-    {
-        settingsPanel.alpha = 0f;
-        settingsPanel.interactable = false;
-        SettingsOpen = false;
-        settingsPanel.blocksRaycasts = false;
-
-        SettingsTextButton.text = "НАСТРОЙКИ";
-        EventSystem.current.SetSelectedGameObject(null);
-    }
 
     public void SetMainMenuMode()
     {
@@ -78,20 +30,4 @@ public class Settings : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (settingsPanel.alpha != 1)
-        {
-            SettingsOpen = false;
-        }
-        if (SettingsOpen == true && EventSystem.current.currentSelectedGameObject != SettingsButton)
-        {
-            EventSystem.current.SetSelectedGameObject(SettingsButton);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape) && SettingsOpen == true)
-        {
-            CloseSettings();
-        }
-    }
 }
