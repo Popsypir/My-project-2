@@ -380,9 +380,8 @@ GameObject:
   - component: {fileID: 160779977}
   - component: {fileID: 160779976}
   - component: {fileID: 160779975}
-  - component: {fileID: 160779978}
   m_Layer: 5
-  m_Name: Authors
+  m_Name: Credits
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -452,14 +451,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 160779978}
-        m_TargetAssemblyTypeName: Credits, Assembly-CSharp
-        m_MethodName: Choise
-        m_Mode: 1
+      - m_Target: {fileID: 458874026}
+        m_TargetAssemblyTypeName: OpenMenu, Assembly-CSharp
+        m_MethodName: OpenMenus
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -502,22 +501,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 160779973}
   m_CullTransparentMesh: 1
---- !u!114 &160779978
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 160779973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2eac6260ae4738744bbdd16f1d38572a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Credits
-  creditsPanel: {fileID: 1135378371}
-  authorsTextButton: {fileID: 1901680047}
-  settingsPanel: {fileID: 814186657}
-  CreditsButton: {fileID: 160779973}
 --- !u!1 &230193632
 GameObject:
   m_ObjectHideFlags: 0
@@ -1602,6 +1585,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 444366983}
   m_CullTransparentMesh: 1
+--- !u!1 &458874024
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 458874025}
+  - component: {fileID: 458874026}
+  m_Layer: 0
+  m_Name: OpenMenuManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &458874025
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 458874024}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1547.617, y: 794.6068, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &458874026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 458874024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75078ecca9c20ce48859880425e79d16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OpenMenu
+  creditsPanel: {fileID: 1135378371}
+  settingsPanel: {fileID: 814186657}
+  authorsTextButton: {fileID: 1901680047}
+  SettingsTextButton: {fileID: 1060410376}
+  SettingsButton: {fileID: 1097876889}
+  CreditsButton: {fileID: 160779973}
 --- !u!1 &464342101
 GameObject:
   m_ObjectHideFlags: 0
@@ -3141,6 +3174,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 2162.999
       objectReference: {fileID: 0}
+    - target: {fileID: 521627515414364260, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 872082003848417758, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -3277,13 +3314,25 @@ PrefabInstance:
       propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4780842511071583976, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6051995232795271924, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6991871978944743458, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 8214813539719813082, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
       propertyPath: m_Name
       value: Phone
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572571573933913468, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.31530762
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 925611574352939229, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
@@ -3802,6 +3851,10 @@ PrefabInstance:
       propertyPath: m_fontSize
       value: 54.35
       objectReference: {fileID: 0}
+    - target: {fileID: 6224687572568004859, guid: 8ebd0b91880a9334ab43ae6db24fc8a8, type: 3}
+      propertyPath: m_fontSize
+      value: 72
+      objectReference: {fileID: 0}
     - target: {fileID: 8118592914027668773, guid: 8ebd0b91880a9334ab43ae6db24fc8a8, type: 3}
       propertyPath: m_Name
       value: ExitConfirmDialog
@@ -3907,8 +3960,8 @@ GameObject:
   - component: {fileID: 814186653}
   - component: {fileID: 814186655}
   - component: {fileID: 814186654}
-  - component: {fileID: 814186656}
   - component: {fileID: 814186657}
+  - component: {fileID: 814186658}
   m_Layer: 5
   m_Name: SettingsPanel
   m_TagString: Untagged
@@ -3934,7 +3987,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.45743752, y: 0.08048148}
   m_AnchorMax: {x: 0.94500005, y: 0.9381111}
-  m_AnchoredPosition: {x: 1.1067505, y: -1.9784851}
+  m_AnchoredPosition: {x: 1.1067505, y: -1.9785156}
   m_SizeDelta: {x: -2.4570923, y: 0.2989273}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &814186654
@@ -3975,24 +4028,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 814186652}
   m_CullTransparentMesh: 1
---- !u!114 &814186656
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 814186652}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39107df866e8cae47910475dcd1df178, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DynamicUIBlur
-  settingsPanel: {fileID: 0}
-  MainMenuButtons: {fileID: 1093948080}
-  SettingsTextButton: {fileID: 0}
-  Phone: {fileID: 1112496766}
-  creditsPanel: {fileID: 0}
-  SettingsButton: {fileID: 0}
 --- !u!225 &814186657
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -4005,6 +4040,20 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
+--- !u!114 &814186658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 814186652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39107df866e8cae47910475dcd1df178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Settings
+  MainMenuButtons: {fileID: 1093948080}
+  Phone: {fileID: 1112496766}
 --- !u!1 &889905646
 GameObject:
   m_ObjectHideFlags: 0
@@ -5410,7 +5459,7 @@ GameObject:
   - component: {fileID: 1093948079}
   - component: {fileID: 1093948080}
   m_Layer: 5
-  m_Name: BackgroundTItile
+  m_Name: MenuButtons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5622,7 +5671,6 @@ GameObject:
   - component: {fileID: 1097876893}
   - component: {fileID: 1097876892}
   - component: {fileID: 1097876891}
-  - component: {fileID: 1097876894}
   m_Layer: 5
   m_Name: Settings
   m_TagString: Untagged
@@ -5694,14 +5742,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1097876894}
-        m_TargetAssemblyTypeName: Settings, Assembly-CSharp
-        m_MethodName: Choise
-        m_Mode: 1
+      - m_Target: {fileID: 458874026}
+        m_TargetAssemblyTypeName: OpenMenu, Assembly-CSharp
+        m_MethodName: OpenMenus
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -5744,24 +5792,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1097876889}
   m_CullTransparentMesh: 1
---- !u!114 &1097876894
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1097876889}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39107df866e8cae47910475dcd1df178, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Settings
-  settingsPanel: {fileID: 814186657}
-  MainMenuButtons: {fileID: 1093948080}
-  SettingsTextButton: {fileID: 1060410376}
-  Phone: {fileID: 1112496766}
-  creditsPanel: {fileID: 1135378371}
-  SettingsButton: {fileID: 1097876889}
 --- !u!1 &1108435346
 GameObject:
   m_ObjectHideFlags: 0
@@ -6006,7 +6036,7 @@ GameObject:
   - component: {fileID: 1139624025}
   - component: {fileID: 1139624024}
   m_Layer: 5
-  m_Name: Title (1)
+  m_Name: Title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8317,7 +8347,7 @@ GameObject:
   - component: {fileID: 1455819733}
   - component: {fileID: 1455819732}
   m_Layer: 5
-  m_Name: Settins
+  m_Name: Settings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8634,7 +8664,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 814186656}
+      - m_Target: {fileID: 814186658}
         m_TargetAssemblyTypeName: Settings, Assembly-CSharp
         m_MethodName: SetMainMenuMode
         m_Mode: 1
@@ -8934,7 +8964,7 @@ GameObject:
   - component: {fileID: 1658565281}
   - component: {fileID: 1658565283}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: VersionText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9298,7 +9328,7 @@ GameObject:
   - component: {fileID: 1719876907}
   - component: {fileID: 1719876906}
   m_Layer: 5
-  m_Name: StartMPGameButton
+  m_Name: MultiplayerGame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9777,10 +9807,10 @@ RectTransform:
   m_Children:
   - {fileID: 1658565280}
   - {fileID: 1093948076}
+  - {fileID: 1135378368}
+  - {fileID: 814186653}
   - {fileID: 679352757}
   - {fileID: 786147889}
-  - {fileID: 814186653}
-  - {fileID: 1135378368}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -10014,7 +10044,7 @@ GameObject:
   - component: {fileID: 1800632970}
   - component: {fileID: 1800632969}
   m_Layer: 5
-  m_Name: Scroll View
+  m_Name: Credits
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11358,3 +11388,4 @@ SceneRoots:
   - {fileID: 1759291584}
   - {fileID: 244414767}
   - {fileID: 388699695}
+  - {fileID: 458874025}
