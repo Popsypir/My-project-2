@@ -13,26 +13,16 @@ public class StartGameApp : MonoBehaviour
     [SerializeField] private CanvasGroup exitPanel;
 
     [Header("Меню настроек")]
-    [SerializeField] private CanvasGroup settingsPanel;
+    [SerializeField] private OpenMenu Openmenu;
     [SerializeField] private CanvasGroup MainMenuButtons;
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (SceneManager.GetActiveScene().name == "Квартирка")
-            {
-                if (settingsPanel.alpha != 1 && MainMenuButtons.alpha != 0)
-                {
-                    exitPanel.alpha = 1;
-                    exitPanel.interactable = true;
-                    exitPanel.blocksRaycasts = true;
-                }
-            }
-            else
-            {
-                return;
-            }
+        if (Input.GetKeyDown(KeyCode.Escape) && Openmenu.getIndex() == 0)
+        {    
+            exitPanel.alpha = 1;
+            exitPanel.interactable = true;
+            exitPanel.blocksRaycasts = true; 
         }
     }
 

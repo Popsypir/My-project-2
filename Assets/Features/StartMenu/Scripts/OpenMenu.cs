@@ -8,29 +8,31 @@ public class OpenMenu : MonoBehaviour
     // ---------------------- Переменные
     private bool _isSettingsOpen = false;
     private bool _isCreditsOpen = false;
-    private bool _isMiniGamesOpen = false;
+    private bool _isExitOpen = false;
     private bool _isMPGamesOpen = false;
     private bool _isLoadGamesOpen = false;
+
+    private int isIndex = 0;
 
     // ---------------------- SerializeField
     [Header("Панели")]
     [SerializeField] private CanvasGroup creditsPanel;
     [SerializeField] private CanvasGroup settingsPanel;
-    [SerializeField] private CanvasGroup miniGamesPanel;
+    [SerializeField] private CanvasGroup ExitPanel;
     [SerializeField] private CanvasGroup MPGamesPanel;
     [SerializeField] private CanvasGroup LoadGamesPanel;
 
     [Header("Тексты кнопок")]
     [SerializeField] private TextMeshProUGUI authorsTextButton;
     [SerializeField] private TextMeshProUGUI SettingsTextButton;
-    [SerializeField] private TextMeshProUGUI MiniGamesTextButton;
+    [SerializeField] private TextMeshProUGUI ExitTextButton;
     [SerializeField] private TextMeshProUGUI MPGamesTextButton;
     [SerializeField] private TextMeshProUGUI LoadGamesTextButton;
 
     [Header("Кнопки")]
     [SerializeField] private GameObject SettingsButton;
     [SerializeField] private GameObject CreditsButton;
-    [SerializeField] private GameObject MiniGamesButton;
+    [SerializeField] private GameObject ExitButton;
     [SerializeField] private GameObject MPGamesButton;
     [SerializeField] private GameObject LoadGamesButton;
 
@@ -39,23 +41,23 @@ public class OpenMenu : MonoBehaviour
         switch (index)
         {
             case 1:
-                if (_isSettingsOpen) { CloseSettings(); }       // Если настройки уже открыты - закрываем
+                if (_isSettingsOpen) { CloseSettings(); isIndex = 0; }       // Если настройки уже открыты - закрываем
                 else { CloseOtherMenus(1); OpenSettings(); }     // Производим закрытие остальных меню и открытие настроек
                 break;
             case 2:
-                if (_isCreditsOpen) { CloseCredits(); }     // аналогично с настройками
+                if (_isCreditsOpen) { CloseCredits(); isIndex = 0; }     // аналогично с настройками
                 else { CloseOtherMenus(2); OpenCredits(); }         
                 break;
             case 3:
-                if (_isMiniGamesOpen) { CloseMiniGames(); }     // аналогично с настройками
-                else { CloseOtherMenus(3); OpenMiniGames(); }
+                if (_isExitOpen) { CloseExit(); isIndex = 0; }     // аналогично с настройками
+                else { CloseOtherMenus(3); OpenExit(); }
                 break;
             case 4:
-                if (_isMPGamesOpen) { CloseMPGames(); }     // аналогично с настройками
+                if (_isMPGamesOpen) { CloseMPGames(); isIndex = 0; }     // аналогично с настройками
                 else { CloseOtherMenus(4); OpenMPGames(); }
                 break;
             case 5:
-                if (_isLoadGamesOpen) { CloseLoadGames(); }     // аналогично с настройками
+                if (_isLoadGamesOpen) { CloseLoadGames(); isIndex = 0; }     // аналогично с настройками
                 else { CloseOtherMenus(5); OpenLoadGames(); }
                 break;
         }
@@ -64,6 +66,7 @@ public class OpenMenu : MonoBehaviour
 // ----------------- Открытия, закрытия меню
     private void OpenSettings()
     {
+        isIndex = 1;
         settingsPanel.alpha = 1.0f;
         settingsPanel.interactable = true;
         _isSettingsOpen = true;
@@ -83,6 +86,7 @@ public class OpenMenu : MonoBehaviour
 
     private void OpenMPGames()
     {
+        isIndex = 4;
         MPGamesPanel.alpha = 1.0f;
         MPGamesPanel.interactable = true;
         _isMPGamesOpen = true;
@@ -102,6 +106,7 @@ public class OpenMenu : MonoBehaviour
 
     private void OpenLoadGames()
     {
+        isIndex = 5;
         LoadGamesPanel.alpha = 1.0f;
         LoadGamesPanel.interactable = true;
         _isLoadGamesOpen = true;
@@ -119,27 +124,34 @@ public class OpenMenu : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(null);
     }
 
-    private void OpenMiniGames()
+    private void OpenExit()
     {
-        miniGamesPanel.alpha = 1.0f;
-        miniGamesPanel.interactable = true;
-        _isMiniGamesOpen = true;
-        miniGamesPanel.blocksRaycasts = true;
-        MiniGamesTextButton.text = "НАЗАД";
+        isIndex = 3;
+        ExitPanel.alpha = 1.0f;
+        ExitPanel.interactable = true;
+        _isExitOpen = true;
+        ExitPanel.blocksRaycasts = true;
+        ExitTextButton.text = "НАЗАД";
     }
 
-    private void CloseMiniGames()
+    private void CloseExit()
     {
-        miniGamesPanel.alpha = 0f;
-        miniGamesPanel.interactable = false;
-        _isMiniGamesOpen = false;
-        miniGamesPanel.blocksRaycasts = false;
-        MiniGamesTextButton.text = "МИНИ-ИГРЫ";
+        ExitPanel.alpha = 0f;
+        ExitPanel.interactable = false;
+        _isExitOpen = false;
+        ExitPanel.blocksRaycasts = false;
+        ExitTextButton.text = "ВЫЙТИ ИЗ ИГРЫ";
         EventSystem.current.SetSelectedGameObject(null);
+    }
+
+    public int getIndex()
+    {
+        return isIndex;
     }
 
     private void OpenCredits()
     {
+        isIndex = 2;
         creditsPanel.alpha = 1.0f;
         creditsPanel.interactable = true;
         creditsPanel.blocksRaycasts = true;
@@ -161,18 +173,18 @@ public class OpenMenu : MonoBehaviour
     {
         switch (index)
         {
-            case 1: CloseCredits(); CloseMiniGames(); CloseMPGames(); CloseLoadGames(); break;   // Закрываем все остальные меню
-            case 2: CloseSettings(); CloseMiniGames(); CloseMPGames(); CloseLoadGames(); break;
+            case 1: CloseCredits(); CloseExit(); CloseMPGames(); CloseLoadGames(); break;   // Закрываем все остальные меню
+            case 2: CloseSettings(); CloseExit(); CloseMPGames(); CloseLoadGames(); break;
             case 3: CloseSettings(); CloseCredits(); CloseMPGames(); CloseLoadGames(); break;
-            case 4: CloseSettings(); CloseCredits(); CloseMiniGames(); CloseLoadGames(); break;
-            case 5: CloseSettings(); CloseCredits(); CloseMiniGames(); CloseMPGames(); break;
+            case 4: CloseSettings(); CloseCredits(); CloseExit(); CloseLoadGames(); break;
+            case 5: CloseSettings(); CloseCredits(); CloseExit(); CloseMPGames(); break;
 
         }
     }
 
     private void Update()
     {
-        if (_isSettingsOpen || _isCreditsOpen || _isMiniGamesOpen || _isMPGamesOpen || _isLoadGamesOpen) // Проверка на открыто ли хотя бы одно меню
+        if (_isSettingsOpen || _isCreditsOpen || _isExitOpen || _isMPGamesOpen || _isLoadGamesOpen) // Проверка на открыто ли хотя бы одно меню
         {
             if (_isSettingsOpen && EventSystem.current.currentSelectedGameObject != SettingsButton)        // Проверка на селект* кнопки (если она не селекнута* - селектим*) 
             {                                                                                              // * - выбор от англ. select
@@ -184,9 +196,9 @@ public class OpenMenu : MonoBehaviour
                 EventSystem.current.SetSelectedGameObject(CreditsButton);
             }
 
-            if (_isMiniGamesOpen && EventSystem.current.currentSelectedGameObject != MiniGamesButton)  // аналогично
+            if (_isExitOpen && EventSystem.current.currentSelectedGameObject != ExitButton)  // аналогично
             {
-                EventSystem.current.SetSelectedGameObject(MiniGamesButton);
+                EventSystem.current.SetSelectedGameObject(ExitButton);
             }
 
             if (_isMPGamesOpen && EventSystem.current.currentSelectedGameObject != MPGamesButton)  // аналогично
@@ -200,13 +212,13 @@ public class OpenMenu : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape) && (_isCreditsOpen || _isSettingsOpen || _isMiniGamesOpen || _isMPGamesOpen || _isLoadGamesOpen)) // Если хотя бы одно меню открыто и нажата кнопка ESC
+        if (Input.GetKeyDown(KeyCode.Escape) && (_isCreditsOpen || _isSettingsOpen || _isExitOpen || _isMPGamesOpen || _isLoadGamesOpen)) // Если хотя бы одно меню открыто и нажата кнопка ESC
         {
-            if (_isSettingsOpen == true) { CloseSettings(); }    // Проверка на конкретное меню и закрытие
-            if (_isCreditsOpen == true) { CloseCredits(); }
-            if (_isMiniGamesOpen == true) { CloseMiniGames(); }
-            if (_isMPGamesOpen == true) { CloseMPGames(); }
-            if (_isLoadGamesOpen == true) { CloseLoadGames(); }
+            if (_isSettingsOpen == true) { CloseSettings(); isIndex = 0; }    // Проверка на конкретное меню и закрытие
+            if (_isCreditsOpen == true) { CloseCredits(); isIndex = 0; }
+            if (_isExitOpen == true) { CloseExit(); isIndex = 0; }
+            if (_isMPGamesOpen == true) { CloseMPGames(); isIndex = 0; }
+            if (_isLoadGamesOpen == true) { CloseLoadGames(); isIndex = 0; }
         }
     }
 }

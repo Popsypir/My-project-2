@@ -909,7 +909,7 @@ GameObject:
   - component: {fileID: 241667818}
   - component: {fileID: 241667817}
   m_Layer: 5
-  m_Name: MiniGames
+  m_Name: Exit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1244,7 +1244,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StartGameApp
   targetSceneName: "\u041A\u0432\u0430\u0440\u0442\u0438\u0440\u043A\u0430"
   exitPanel: {fileID: 1367842081}
-  settingsPanel: {fileID: 0}
+  Openmenu: {fileID: 458874026}
   MainMenuButtons: {fileID: 1093948080}
 --- !u!1 &401663881
 GameObject:
@@ -1901,17 +1901,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OpenMenu
   creditsPanel: {fileID: 1135378371}
   settingsPanel: {fileID: 814186657}
-  miniGamesPanel: {fileID: 778829976}
+  ExitPanel: {fileID: 1367842081}
   MPGamesPanel: {fileID: 722731861}
   LoadGamesPanel: {fileID: 1694919466}
   authorsTextButton: {fileID: 1901680047}
   SettingsTextButton: {fileID: 1060410376}
-  MiniGamesTextButton: {fileID: 1486121282}
+  ExitTextButton: {fileID: 1486121282}
   MPGamesTextButton: {fileID: 1405201178}
   LoadGamesTextButton: {fileID: 981825106}
   SettingsButton: {fileID: 1097876889}
   CreditsButton: {fileID: 160779973}
-  MiniGamesButton: {fileID: 241667815}
+  ExitButton: {fileID: 241667815}
   MPGamesButton: {fileID: 1719876904}
   LoadGamesButton: {fileID: 1441242066}
 --- !u!1 &464342101
@@ -10564,7 +10564,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u041C\u0418\u041D\u0418-\u0418\u0413\u0420\u042B"
+  m_text: "\u0412\u042B\u0419\u0422\u0418 \u0418\u0417 \u0418\u0413\u0420\u042B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9a063275a5565654cba60a089a37ff09, type: 2}
   m_sharedMaterial: {fileID: 4171208925774811344, guid: 9a063275a5565654cba60a089a37ff09, type: 2}
