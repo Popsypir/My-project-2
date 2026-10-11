@@ -3,6 +3,8 @@ using System.Collections;
 
 public class TitleAnimation : MonoBehaviour
 {
+    private bool is_anim = false;
+
     // ==================== НАПРАВЛЕНИЕ АНИМАЦИИ ====================
     public enum AnimDirection
     {
@@ -92,6 +94,7 @@ public class TitleAnimation : MonoBehaviour
 
     private IEnumerator AnimateAll()
     {
+        is_anim = true;
         // 1. Анимация заголовка
         yield return StartCoroutine(AnimateTitle());
 
@@ -100,6 +103,7 @@ public class TitleAnimation : MonoBehaviour
 
         // 3. Анимация кнопок
         yield return StartCoroutine(AnimateButtons());
+        is_anim = false;
     }
 
     // ==================== АНИМАЦИЯ ЗАГОЛОВКА ====================
@@ -117,13 +121,10 @@ public class TitleAnimation : MonoBehaviour
         {
             var data = buttons[i];
 
-            // Ждём индивидуальную задержку кнопки
             yield return new WaitForSeconds(data.delay);
 
-            // Показываем кнопку
             data.button.gameObject.SetActive(true);
 
-            // Запускаем анимацию
             if (data.direction == AnimDirection.FromLeft)
             {
                 StartCoroutine(FlyInFromLeft(data.button, buttonsFinalPos[i], buttonFlyDuration));
@@ -133,7 +134,6 @@ public class TitleAnimation : MonoBehaviour
                 StartCoroutine(FlyInFromBottom(data.button, buttonsFinalPos[i], buttonFlyDuration));
             }
 
-            // Задержка между кнопками (stagger)
             yield return new WaitForSeconds(staggerDelay);
         }
     }
@@ -234,5 +234,30 @@ public class TitleAnimation : MonoBehaviour
         }
 
         target.anchoredPosition = basePos;
+    }
+    private void SkipAnimation()
+    {
+        StopAllCoroutines();
+        if (projectText != null) projectText.anchoredPosition = projectFinalPos;
+        if (myText != null) myText.anchoredPosition = myFinalPos;
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            if (buttons[i].button != null)
+            {
+                buttons[i].button.gameObject.SetActive(true);
+                buttons[i].button.anchoredPosition = buttonsFinalPos[i];
+            }
+        }
+        is_anim = false;
+
+        Debug.Log("Анимация пропущена");
+    }
+
+    private void Update()
+    {
+        if (is_anim && (Input.GetKeyDown(KeyCode.Space)))
+        {
+            SkipAnimation();
+        }
     }
 }

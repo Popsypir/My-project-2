@@ -20,6 +20,8 @@ namespace GamePhone.Apps
     /// </summary>
     public class ExitGameApp : MonoBehaviour
     {
+
+        [SerializeField] private OpenMenu Openmenu;
         public static ExitGameApp Instance { get; private set; }
 
         [Tooltip("Сам объект должен ОСТАВАТЬСЯ включённым в сцене (activeSelf = true) - " +
@@ -64,6 +66,7 @@ namespace GamePhone.Apps
         // Кнопка "Нет"
         public void Cancel()
         {
+            Openmenu.CloseExit();
             SetVisible(false);
             PhoneUIController.Instance?.SetInputEnabled(true);
         }
