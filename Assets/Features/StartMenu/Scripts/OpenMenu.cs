@@ -134,7 +134,7 @@ public class OpenMenu : MonoBehaviour
         ExitTextButton.text = "НАЗАД";
     }
 
-    private void CloseExit()
+    public void CloseExit()
     {
         ExitPanel.alpha = 0f;
         ExitPanel.interactable = false;
