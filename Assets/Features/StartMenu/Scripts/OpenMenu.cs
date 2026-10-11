@@ -2,16 +2,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Runtime.CompilerServices;
+using System;
+using Unity.VisualScripting;
 
 public class OpenMenu : MonoBehaviour
 {
     // ---------------------- Переменные
-    private bool _isSettingsOpen = false;
-    private bool _isCreditsOpen = false;
-    private bool _isExitOpen = false;
-    private bool _isMPGamesOpen = false;
-    private bool _isLoadGamesOpen = false;
-
     private int isIndex = 0;
 
     // ---------------------- SerializeField
@@ -41,107 +38,70 @@ public class OpenMenu : MonoBehaviour
         switch (index)
         {
             case 1:
-                if (_isSettingsOpen) { CloseSettings(); isIndex = 0; }       // Если настройки уже открыты - закрываем
-                else { CloseOtherMenus(1); OpenSettings(); }     // Производим закрытие остальных меню и открытие настроек
+                if (isIndex == 1) { Close(1); isIndex = 0; }       // Если настройки уже открыты - закрываем
+                else { CloseOtherMenus(1); Open(1); }     // Производим закрытие остальных меню и открытие настроек
                 break;
             case 2:
-                if (_isCreditsOpen) { CloseCredits(); isIndex = 0; }     // аналогично с настройками
-                else { CloseOtherMenus(2); OpenCredits(); }         
+                if (isIndex == 2) { Close(2); isIndex = 0; }     // аналогично с настройками
+                else { CloseOtherMenus(2); Open(2); }         
                 break;
             case 3:
-                if (_isExitOpen) { CloseExit(); isIndex = 0; }     // аналогично с настройками
-                else { CloseOtherMenus(3); OpenExit(); }
+                if (isIndex == 3) { Close(3); isIndex = 0; }     // аналогично с настройками
+                else { CloseOtherMenus(3); Open(3); }
                 break;
             case 4:
-                if (_isMPGamesOpen) { CloseMPGames(); isIndex = 0; }     // аналогично с настройками
-                else { CloseOtherMenus(4); OpenMPGames(); }
+                if (isIndex == 4) { Close(4); isIndex = 0; }     // аналогично с настройками
+                else { CloseOtherMenus(4); Open(4); }
                 break;
             case 5:
-                if (_isLoadGamesOpen) { CloseLoadGames(); isIndex = 0; }     // аналогично с настройками
-                else { CloseOtherMenus(5); OpenLoadGames(); }
+                if (isIndex == 5) { Close(5); isIndex = 0; }     // аналогично с настройками
+                else { CloseOtherMenus(5); Open(5); }
                 break;
         }
     }
 
 // ----------------- Открытия, закрытия меню
-    private void OpenSettings()
+    public void Open(int index)
     {
-        isIndex = 1;
-        settingsPanel.alpha = 1.0f;
-        settingsPanel.interactable = true;
-        _isSettingsOpen = true;
-        settingsPanel.blocksRaycasts = true;
-        SettingsTextButton.text = "НАЗАД";
+        isIndex = index;
+        CanvasGroup Panel = null;
+        TextMeshProUGUI Text = null;
+        
+        switch (index) {
+            case 1: Panel = settingsPanel; Text = SettingsTextButton; break;
+            case 2: Panel = creditsPanel; Text = authorsTextButton; break;
+            case 3: Panel = ExitPanel; Text = ExitTextButton; break;
+            case 4: Panel = MPGamesPanel; Text = MPGamesTextButton; break;
+            case 5: Panel = LoadGamesPanel; Text = LoadGamesTextButton; break;
+        }
+
+        Panel.interactable = true; Panel.alpha = 1; Panel.blocksRaycasts = true;
+        Text.text = "НАЗАД";
     }
 
-    private void CloseSettings()
+    public void Close(int index)
     {
-        settingsPanel.alpha = 0f;
-        settingsPanel.interactable = false;
-        _isSettingsOpen = false;
-        settingsPanel.blocksRaycasts = false;
-        SettingsTextButton.text = "НАСТРОЙКИ";
+        CanvasGroup Panel = null;
+        TextMeshProUGUI Text = null;
+        string str_text = null;
+
+        switch (index)
+        {
+            case 1: Panel = settingsPanel; Text = SettingsTextButton; str_text = "НАСТРОЙКИ"; break;
+            case 2: Panel = creditsPanel; Text = authorsTextButton; str_text = "ТИТРЫ"; break;
+            case 3: Panel = ExitPanel; Text = ExitTextButton; str_text = "ВЫЙТИ ИЗ ИГРЫ"; break;
+            case 4: Panel = MPGamesPanel; Text = MPGamesTextButton; str_text = "СЕТЕВАЯ ИГРА"; break;
+            case 5: Panel = LoadGamesPanel; Text = LoadGamesTextButton; str_text = "ЗАГРУЗИТЬ ИГРУ"; break;
+        }
+
+        Panel.interactable = false; Panel.alpha = 0; Panel.blocksRaycasts = false;
+        Text.text = str_text;
         EventSystem.current.SetSelectedGameObject(null);
-    }
 
-    private void OpenMPGames()
-    {
-        isIndex = 4;
-        MPGamesPanel.alpha = 1.0f;
-        MPGamesPanel.interactable = true;
-        _isMPGamesOpen = true;
-        MPGamesPanel.blocksRaycasts = true;
-        MPGamesTextButton.text = "НАЗАД";
-    }
-
-    private void CloseMPGames()
-    {
-        MPGamesPanel.alpha = 0f;
-        MPGamesPanel.interactable = false;
-        _isMPGamesOpen = false;
-        MPGamesPanel.blocksRaycasts = false;
-        MPGamesTextButton.text = "СЕТЕВАЯ ИГРА";
-        EventSystem.current.SetSelectedGameObject(null);
-    }
-
-    private void OpenLoadGames()
-    {
-        isIndex = 5;
-        LoadGamesPanel.alpha = 1.0f;
-        LoadGamesPanel.interactable = true;
-        _isLoadGamesOpen = true;
-        LoadGamesPanel.blocksRaycasts = true;
-        LoadGamesTextButton.text = "НАЗАД";
-    }
-
-    private void CloseLoadGames()
-    {
-        LoadGamesPanel.alpha = 0f;
-        LoadGamesPanel.interactable = false;
-        _isLoadGamesOpen = false;
-        LoadGamesPanel.blocksRaycasts = false;
-        LoadGamesTextButton.text = "ЗАГРУЗИТЬ ИГРУ";
-        EventSystem.current.SetSelectedGameObject(null);
-    }
-
-    private void OpenExit()
-    {
-        isIndex = 3;
-        ExitPanel.alpha = 1.0f;
-        ExitPanel.interactable = true;
-        _isExitOpen = true;
-        ExitPanel.blocksRaycasts = true;
-        ExitTextButton.text = "НАЗАД";
-    }
-
-    public void CloseExit()
-    {
-        ExitPanel.alpha = 0f;
-        ExitPanel.interactable = false;
-        _isExitOpen = false;
-        ExitPanel.blocksRaycasts = false;
-        ExitTextButton.text = "ВЫЙТИ ИЗ ИГРЫ";
-        EventSystem.current.SetSelectedGameObject(null);
+        if (isIndex == index)
+        {
+            isIndex = 0;
+        }
     }
 
     public int getIndex()
@@ -149,76 +109,49 @@ public class OpenMenu : MonoBehaviour
         return isIndex;
     }
 
-    private void OpenCredits()
-    {
-        isIndex = 2;
-        creditsPanel.alpha = 1.0f;
-        creditsPanel.interactable = true;
-        creditsPanel.blocksRaycasts = true;
-        _isCreditsOpen = true;
-        authorsTextButton.text = "НАЗАД";
-    }
-
-    private void CloseCredits()
-    {
-        creditsPanel.alpha = 0;
-        creditsPanel.interactable = false;
-        creditsPanel.blocksRaycasts = false;
-        _isCreditsOpen = false;
-        authorsTextButton.text = "ТИТРЫ";
-        EventSystem.current.SetSelectedGameObject(null);
-    }
-
     private void CloseOtherMenus(int index)
     {
         switch (index)
         {
-            case 1: CloseCredits(); CloseExit(); CloseMPGames(); CloseLoadGames(); break;   // Закрываем все остальные меню
-            case 2: CloseSettings(); CloseExit(); CloseMPGames(); CloseLoadGames(); break;
-            case 3: CloseSettings(); CloseCredits(); CloseMPGames(); CloseLoadGames(); break;
-            case 4: CloseSettings(); CloseCredits(); CloseExit(); CloseLoadGames(); break;
-            case 5: CloseSettings(); CloseCredits(); CloseExit(); CloseMPGames(); break;
-
+            case 1: Array.ForEach(new[] { 2, 3, 4, 5 }, Close); break;   // Закрываем все остальные меню
+            case 2: Array.ForEach(new[] { 1, 3, 4, 5 }, Close); break;
+            case 3: Array.ForEach(new[] { 1, 2, 4, 5 }, Close); break;
+            case 4: Array.ForEach(new[] { 1, 2, 3, 5 }, Close); break;
+            case 5: Array.ForEach(new[] { 1, 2, 3, 4 }, Close); break;
         }
     }
 
     private void Update()
     {
-        if (_isSettingsOpen || _isCreditsOpen || _isExitOpen || _isMPGamesOpen || _isLoadGamesOpen) // Проверка на открыто ли хотя бы одно меню
+        if (isIndex != 0) // Проверка на открыто ли хотя бы одно меню
         {
-            if (_isSettingsOpen && EventSystem.current.currentSelectedGameObject != SettingsButton)        // Проверка на селект* кнопки (если она не селекнута* - селектим*) 
-            {                                                                                              // * - выбор от англ. select
-                EventSystem.current.SetSelectedGameObject(SettingsButton);
-            }
-
-            if (_isCreditsOpen && EventSystem.current.currentSelectedGameObject != CreditsButton)  // аналогично
+            switch (isIndex)
             {
-                EventSystem.current.SetSelectedGameObject(CreditsButton);
-            }
-
-            if (_isExitOpen && EventSystem.current.currentSelectedGameObject != ExitButton)  // аналогично
-            {
-                EventSystem.current.SetSelectedGameObject(ExitButton);
-            }
-
-            if (_isMPGamesOpen && EventSystem.current.currentSelectedGameObject != MPGamesButton)  // аналогично
-            {
-                EventSystem.current.SetSelectedGameObject(MPGamesButton);
-            }
-
-            if (_isLoadGamesOpen && EventSystem.current.currentSelectedGameObject != LoadGamesButton)  // аналогично
-            {
-                EventSystem.current.SetSelectedGameObject(LoadGamesButton);
+                case 1:
+                    if (EventSystem.current.currentSelectedGameObject != SettingsButton) { EventSystem.current.SetSelectedGameObject(SettingsButton); }
+                    break;
+                case 2:
+                    if (EventSystem.current.currentSelectedGameObject != CreditsButton) { EventSystem.current.SetSelectedGameObject(CreditsButton); }
+                    break;
+                case 3:
+                    if (EventSystem.current.currentSelectedGameObject != ExitButton) { EventSystem.current.SetSelectedGameObject(ExitButton); }
+                    break;
+                case 4:
+                    if (EventSystem.current.currentSelectedGameObject != MPGamesButton) { EventSystem.current.SetSelectedGameObject(MPGamesButton); }
+                    break;
+                case 5:
+                    if (EventSystem.current.currentSelectedGameObject != LoadGamesButton) { EventSystem.current.SetSelectedGameObject(LoadGamesButton); }
+                    break;
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape) && (_isCreditsOpen || _isSettingsOpen || _isExitOpen || _isMPGamesOpen || _isLoadGamesOpen)) // Если хотя бы одно меню открыто и нажата кнопка ESC
+        if (Input.GetKeyDown(KeyCode.Escape) && isIndex != 0) // Если хотя бы одно меню открыто и нажата кнопка ESC
         {
-            if (_isSettingsOpen == true) { CloseSettings(); isIndex = 0; }    // Проверка на конкретное меню и закрытие
-            if (_isCreditsOpen == true) { CloseCredits(); isIndex = 0; }
-            if (_isExitOpen == true) { CloseExit(); isIndex = 0; }
-            if (_isMPGamesOpen == true) { CloseMPGames(); isIndex = 0; }
-            if (_isLoadGamesOpen == true) { CloseLoadGames(); isIndex = 0; }
+            if (isIndex == 1) { Close(1); isIndex = 0; }    // Проверка на конкретное меню и закрытие
+            if (isIndex == 2) { Close(2); isIndex = 0; }
+            if (isIndex == 3) { Close(3); isIndex = 0; }
+            if (isIndex == 4) { Close(4); isIndex = 0; }
+            if (isIndex == 5) { Close(5); isIndex = 0; }
         }
     }
 }
