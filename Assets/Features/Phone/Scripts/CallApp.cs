@@ -255,10 +255,12 @@ namespace GamePhone.Apps
             {
                 DayManager.Instance?.SetPendingJob(entry);
 
-                taskManager.CompleteCurrentTask(1);
-
-
-                // ==========================================================
+                // Панель задач есть только в квартире: на работе (магазин, почта,
+                // охрана) поле taskManager пустое. Без этой проверки звонок с
+                // рабочей локации падал с ошибкой прямо посреди разговора - и
+                // экран звонка оставался висеть, потому что корутина обрывалась.
+                if (taskManager != null)
+                    taskManager.CompleteCurrentTask(1);
             }
 
             yield return new WaitForSecondsRealtime(_callEndedShowTime);

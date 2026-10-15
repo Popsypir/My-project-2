@@ -37,7 +37,10 @@ namespace GamePhone.Warehouse
         [SerializeField] private float _minHoldDistance = 0.6f;
         [SerializeField] private float _maxHoldDistance = 2.5f;
         [SerializeField] private float _zoomSpeed = 2f;
-        [SerializeField] private float _followSpeed = 15f;
+        [Tooltip("Как цепко посылка держится за прицел. Больше - меньше отставание, но резче рывки при ударах")]
+        [SerializeField] private float _followSpeed = 30f;
+        [Tooltip("Предел скорости переноски, метров в секунду. Нужен, чтобы далёкая посылка не прошила стену насквозь")]
+        [SerializeField] private float _maxFollowSpeed = 30f;
         [SerializeField] private float _rotateSensitivity = 5f;
         [SerializeField] private float _playerClearanceMargin = 0.2f;
 
@@ -55,12 +58,22 @@ namespace GamePhone.Warehouse
                  "Висит выше - просто выпадает из рук и падает сама")]
         [SerializeField] private float _maxDropHeight = 1.2f;
 
+        [Header("Бросок")]
+        [Tooltip("С какой скорости движения отпускание считается броском, а не аккуратной постановкой. " +
+                 "Метров в секунду")]
+        [SerializeField] private float _throwSpeed = 2.5f;
+        [Tooltip("Во сколько раз усилить бросок. 1 - лететь ровно с той скоростью, с какой вёл посылку")]
+        [SerializeField] private float _throwBoost = 1.15f;
+
         private Box _heldBox;
         private Collider _heldCollider;
         private float _holdDistance;
         private Quaternion _rotationOffset;
         private Vector3 _leftPawLocalPos, _rightPawLocalPos;
         private Quaternion _leftPawLocalRot, _rightPawLocalRot;
+        private Vector3 _leftPawRestPos, _rightPawRestPos;
+        private Quaternion _leftPawRestRot, _rightPawRestRot;
+        private bool _pawsNeedRestore;
         private bool _rotationRequested;
 
         public bool IsCarrying => _heldBox != null;
@@ -131,7 +144,10 @@ namespace GamePhone.Warehouse
             if (rb == null) return;
 
             Vector3 target = ClampAwayFromPlayer(_camera.transform.position + _camera.transform.forward * _holdDistance);
-            rb.linearVelocity = (target - rb.position) * _followSpeed;
+            // Скорость ограничиваем: без этого посылка, оказавшаяся далеко от
+            // прицела, за один шаг физики пролетает сквозь стены
+            Vector3 pull = (target - rb.position) * _followSpeed;
+            rb.linearVelocity = Vector3.ClampMagnitude(pull, _maxFollowSpeed);
             rb.MoveRotation(_camera.transform.rotation * _rotationOffset);
             rb.angularVelocity = Vector3.zero;
         }
@@ -139,11 +155,35 @@ namespace GamePhone.Warehouse
         // Лапы ставим ПОСЛЕ того, как Animator применил свою позу за кадр
         private void LateUpdate()
         {
-            if (_heldBox == null) return;
+            if (_heldBox == null)
+            {
+                // Ровно один раз после того, как посылку отпустили - дальше
+                // лапы свободны, и если анимация их всё-таки двигает, мешать ей
+                // мы не будем
+                if (_pawsNeedRestore) { RestorePaws(); _pawsNeedRestore = false; }
+                return;
+            }
 
+            _pawsNeedRestore = true;
             ApplyPaw(_leftPaw, _leftPawLocalPos, _leftPawLocalRot);
             ApplyPaw(_rightPaw, _rightPawLocalPos, _rightPawLocalRot);
         }
+        // Поза лап, с которой они начинали. Пока игрок что-то несёт, мы ставим
+        // кости лап сами, а Animator их не трогает - у анимации простоя для них
+        // просто нет дорожек. Поэтому, отпустив предмет, лапы так и остались бы
+        // торчать там, где была коробка: вернуть их некому, кроме нас.
+        private void CapturePawRest()
+        {
+            if (_leftPaw != null) { _leftPawRestPos = _leftPaw.localPosition; _leftPawRestRot = _leftPaw.localRotation; }
+            if (_rightPaw != null) { _rightPawRestPos = _rightPaw.localPosition; _rightPawRestRot = _rightPaw.localRotation; }
+        }
+
+        private void RestorePaws()
+        {
+            if (_leftPaw != null) { _leftPaw.localPosition = _leftPawRestPos; _leftPaw.localRotation = _leftPawRestRot; }
+            if (_rightPaw != null) { _rightPaw.localPosition = _rightPawRestPos; _rightPaw.localRotation = _rightPawRestRot; }
+        }
+
 
         private void ApplyPaw(Transform paw, Vector3 localPos, Quaternion localRot)
         {
@@ -177,9 +217,12 @@ namespace GamePhone.Warehouse
                 var box = h.collider.GetComponentInParent<Box>();
                 if (ignore != null && box == ignore) continue;
 
+                // Фургон целью НЕ считается, хотя раньше в него "отдавали" коробку.
+                // Иначе его кузов перехватывает прицел, и коробку, лежащую
+                // внутри, уже не взять: луч упирается в сам фургон.
+                // Для нас он теперь просто поверхность, как пол или прилавок
                 bool isTarget = box != null
-                                || h.collider.GetComponentInParent<PostNpc>() != null
-                                || h.collider.GetComponentInParent<Van>() != null;
+                                || h.collider.GetComponentInParent<PostNpc>() != null;
 
                 if (isTarget && !hasTarget) { target = h; hasTarget = true; }
                 else if (!isTarget && !hasSurface) { surface = h; hasSurface = true; }
@@ -209,6 +252,10 @@ namespace GamePhone.Warehouse
 
         private void StartCarrying(Box box, Collider boxCollider)
         {
+            // Запоминаем позу лап ДО того, как начнём ставить их сами -
+            // именно сюда они вернутся, когда посылку отпустят
+            CapturePawRest();
+
             _heldBox = box;
             _heldCollider = boxCollider != null ? boxCollider : box.GetComponent<Collider>();
             _holdDistance = _startHoldDistance;
@@ -233,6 +280,11 @@ namespace GamePhone.Warehouse
 
             if (box == null) return;
 
+            // Движение запоминаем ДО всего остального: дальше посылку могут
+            // поставить на место, и скорость обнулится
+            Vector3 velocity = box.Rb != null ? box.Rb.linearVelocity : Vector3.zero;
+            Vector3 spin = box.Rb != null ? box.Rb.angularVelocity : Vector3.zero;
+
             AimScan(box, out RaycastHit target, out bool hasTarget, out RaycastHit surface, out bool hasSurface);
 
             if (hasTarget)
@@ -240,14 +292,24 @@ namespace GamePhone.Warehouse
                 var npc = target.collider.GetComponentInParent<PostNpc>();
                 if (npc != null && npc.GiveParcel(box)) return;
 
-                var van = target.collider.GetComponentInParent<Van>();
-                if (van != null && van.TryAccept(box)) return;
+                // Фургон отдельно не обрабатываем: коробку в него просто
+                // бросают, и она падает в кузов по обычной физике - сколько
+                // влезет, столько влезет
             }
 
-            // Опускаем посылку ровно вниз - на то, над чем она сейчас висит
-            // (прилавок, стеллаж, пол). Раньше она ставилась в точку прицела, а
-            // прицел достаёт на несколько метров: посмотрел на дальнюю стену -
-            // и посылка при отпускании прыгала через всю комнату.
+            // Размахнулся и отпустил - это бросок: посылка летит дальше сама,
+            // с тем же движением. Ставить её при этом на опору нельзя, иначе
+            // она на глазах прыгает вниз, будто её притянуло к полу
+            if (velocity.magnitude >= _throwSpeed)
+            {
+                box.ThrowWith(Vector3.ClampMagnitude(velocity * _throwBoost, _maxFollowSpeed), spin);
+                return;
+            }
+
+            // Отпустил спокойно - аккуратно опускаем ровно вниз, на то, над чем
+            // посылка висит: прилавок, стеллаж, пол. Без этого она ставилась бы
+            // в точку прицела, а прицел достаёт на несколько метров - посмотрел
+            // на дальнюю стену, и посылка прыгнула через всю комнату
             if (TryFindFloorUnder(box, out Vector3 place))
             {
                 box.PlaceAt(place);

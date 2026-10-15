@@ -37,6 +37,8 @@ namespace GamePhone.Warehouse
         /// <summary>Имя получателя с бирки. Посетитель забирает только свою посылку (см. PostNpc).</summary>
         public string RecipientName { get; private set; }
 
+        private RigidbodyInterpolation _interpolationBeforeCarry;
+
         private Rigidbody _rb;
         private Collider _collider;
         private Vector3 _worldScale;
@@ -67,6 +69,11 @@ namespace GamePhone.Warehouse
         /// <summary>Игрок взял посылку в руки - дальше ею двигает физика (см. BoxCarrier).</summary>
         public void BeginCarry()
         {
+            // Физика считается 50 раз в секунду, а кадров рисуется больше -
+            // без сглаживания коробка в лапах дёргается рывками между шагами
+            _interpolationBeforeCarry = _rb.interpolation;
+            _rb.interpolation = RigidbodyInterpolation.Interpolate;
+
             IsHeld = true;
             IsInVan = false;
             transform.SetParent(null, true);
@@ -129,6 +136,18 @@ namespace GamePhone.Warehouse
         }
 
         /// <summary>
+        /// Выпустить посылку, сохранив движение, с которым её вели. Так бросок
+        /// получается настоящим: размахнулся и отпустил - она полетела, а не
+        /// обмякла в воздухе и шлёпнулась под ноги.
+        /// </summary>
+        public void ThrowWith(Vector3 velocity, Vector3 spin)
+        {
+            Release();
+            _rb.linearVelocity = velocity;
+            _rb.angularVelocity = spin;
+        }
+
+        /// <summary>
         /// Кладёт коробку в указанное место и возвращает ей обычную физику -
         /// так её выкладывает на стойку посетитель (см. PostNpc).
         /// </summary>
@@ -143,6 +162,10 @@ namespace GamePhone.Warehouse
         // старом месте - коробка видна на новом, а подобрать её там нельзя.
         private void Release(Vector3? position = null)
         {
+            // Сглаживание нужно только пока коробку несут: лежащей оно ни к
+            // чему, а стоит каждый кадр лишних вычислений
+            _rb.interpolation = _interpolationBeforeCarry;
+
             IsHeld = false;
             IsInVan = false;
             _rb.isKinematic = true;
@@ -158,14 +181,22 @@ namespace GamePhone.Warehouse
             _rb.angularVelocity = Vector3.zero;
         }
 
-        // Аккуратно кладётся в фургон (см. Van.TryAccept) - без физики, чтобы не заваливалась
-        public void PlaceInVan(Transform slot)
+        /// <summary>
+        /// Фургон уехал и увёз эту посылку (см. Van.Depart). Физику выключаем и
+        /// цепляем коробку к кузову: живой Rigidbody считается в мировых
+        /// координатах и остался бы стоять на месте, пока фургон уезжает.
+        /// </summary>
+        public void RideInVan(Transform cargoRoot)
         {
             IsHeld = false;
             IsInVan = true;
             _rb.isKinematic = true;
-            _collider.enabled = false;
-            AttachTo(slot);
+            _rb.linearVelocity = Vector3.zero;
+            _rb.angularVelocity = Vector3.zero;
+
+            // Позу не трогаем: коробка остаётся лежать ровно там, куда её
+            // накидал игрок, просто теперь едет вместе с кузовом
+            transform.SetParent(cargoRoot, true);
         }
 
         // Родитель может быть отмасштабирован (игрок в сценах стоит со scale 0.52) -

@@ -1986,7 +1986,7 @@ PrefabInstance:
     - target: {fileID: 5396675056665614028, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
       propertyPath: '_knownNumbers.Array.data[2]'
       value: 
-      objectReference: {fileID: 11400000, guid: 373713dc0291f1a4dbe4cdec1e362e01, type: 2}
+      objectReference: {fileID: 11400000, guid: 634c1c2258903ff43b02dd251fb16e50, type: 2}
     - target: {fileID: 6329879129671241128, guid: 28f881da69837f54a8c4f07cde7ced8c, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0

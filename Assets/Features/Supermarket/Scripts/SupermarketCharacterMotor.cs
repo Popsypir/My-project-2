@@ -86,13 +86,7 @@ namespace GamePhone.Shop
         private Vector3 ReadMoveDirection()
         {
             if (_cameraMode == null) return Vector3.zero;
-            // Игрок печатает в поле (например, номер телефона) - WASD не должен
-            // одновременно двигать персонажа И вводить буквы в текст.
-            if (UIFocusState.IsTypingInField()) return Vector3.zero;
-            // Поверх экрана показан какой-нибудь оверлей с курсором (телефон,
-            // панель итогов смены и т.п.) - двигаться в это время не должен
-            if (PhoneUIController.Instance != null && PhoneUIController.Instance.IsOpen) return Vector3.zero;
-            if (CursorRequestState.AnyRequested) return Vector3.zero;
+            if (GameplayInputLock.Blocked) return Vector3.zero;
 
             Vector2 rawInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
             Vector3 moveDir = _cameraMode.GetMoveDirection(rawInput);
@@ -117,7 +111,7 @@ namespace GamePhone.Shop
                 _verticalVelocity = -2f; // небольшая сила прижатия к земле
 
             // v = sqrt(h * -2 * g) - скорость вверх, чтобы подняться ровно на _jumpHeight при текущей гравитации.
-            if (grounded && Input.GetKeyDown(_jumpKey))
+            if (grounded && !GameplayInputLock.Blocked && Input.GetKeyDown(_jumpKey))
                 _verticalVelocity = Mathf.Sqrt(_jumpHeight * -2f * _gravity);
 
             _verticalVelocity += _gravity * Time.deltaTime;

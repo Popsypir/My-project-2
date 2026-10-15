@@ -87,6 +87,9 @@ namespace GamePhone.Shop
         private Quaternion _leftPawLocalRot;
         private Vector3 _rightPawLocalPos;
         private Quaternion _rightPawLocalRot;
+        private Vector3 _leftPawRestPos, _rightPawRestPos;
+        private Quaternion _leftPawRestRot, _rightPawRestRot;
+        private bool _pawsNeedRestore;
 
         public bool IsHoldingItem => _heldItem != null;
         public bool IsRotatingItem => _heldItem != null && Input.GetMouseButton(1);
@@ -154,11 +157,34 @@ namespace GamePhone.Shop
         {
             // Ставим лапы ПОСЛЕ того, как Animator применил свою позу за этот кадр -
             // иначе он тут же перезатирает нашу позицию своей анимацией простоя.
-            if (_pawTarget == null) return;
+            if (_pawTarget == null)
+            {
+                // Ровно один раз после того, как товар отпустили - иначе лапы
+                // так и останутся висеть там, где был товар
+                if (_pawsNeedRestore) { RestorePaws(); _pawsNeedRestore = false; }
+                return;
+            }
 
+            _pawsNeedRestore = true;
             ApplyPaw(_leftPaw, _leftPawLocalPos, _leftPawLocalRot);
             ApplyPaw(_rightPaw, _rightPawLocalPos, _rightPawLocalRot);
         }
+        // Поза лап, с которой они начинали. Пока игрок что-то несёт, мы ставим
+        // кости лап сами, а Animator их не трогает - у анимации простоя для них
+        // просто нет дорожек. Поэтому, отпустив предмет, лапы так и остались бы
+        // торчать там, где была коробка: вернуть их некому, кроме нас.
+        private void CapturePawRest()
+        {
+            if (_leftPaw != null) { _leftPawRestPos = _leftPaw.localPosition; _leftPawRestRot = _leftPaw.localRotation; }
+            if (_rightPaw != null) { _rightPawRestPos = _rightPaw.localPosition; _rightPawRestRot = _rightPaw.localRotation; }
+        }
+
+        private void RestorePaws()
+        {
+            if (_leftPaw != null) { _leftPaw.localPosition = _leftPawRestPos; _leftPaw.localRotation = _leftPawRestRot; }
+            if (_rightPaw != null) { _rightPaw.localPosition = _rightPawRestPos; _rightPaw.localRotation = _rightPawRestRot; }
+        }
+
 
         private void ApplyPaw(Transform paw, Vector3 localPos, Quaternion localRot)
         {
@@ -182,6 +208,8 @@ namespace GamePhone.Shop
 
             _heldItem = item;
             _heldItemCollider = hit.collider;
+            // Позу лап запоминаем ДО первого перехвата - в неё и вернём
+            CapturePawRest();
             _pawTarget = item.transform;
             _holdDistance = _startHoldDistance;
             _itemRotationOffset = Quaternion.Inverse(_camera.transform.rotation) * item.Rb.rotation;
@@ -202,6 +230,7 @@ namespace GamePhone.Shop
 
             Transform thiefTransform = thief.transform;
 
+            CapturePawRest();
             _pawTarget = thiefTransform;
             ComputePawOffsets(thiefTransform, hitCollider);
 

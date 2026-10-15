@@ -92,7 +92,9 @@ public class TaskManager : MonoBehaviour
                 isPanelMoving = false;
             }
         }
-        if (Input.GetKeyDown(KeyCode.Tab) && !isPanelMoving)
+        // Tab в текстовом поле переводит курсор между полями - дёргать
+        // панель задач в этот момент не надо
+        if (Input.GetKeyDown(KeyCode.Tab) && !isPanelMoving && !GamePhone.GameplayInputLock.Blocked)
         {
             if (!isPanelHidden)
             {

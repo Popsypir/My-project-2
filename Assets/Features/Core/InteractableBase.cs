@@ -43,7 +43,10 @@ namespace GamePhone.World
 
         protected virtual void Update()
         {
-            if (PlayerInRange && Input.GetKeyDown(_interactKey))
+            // Проверка обязательна: в русской раскладке E - это буква "е",
+            // и без неё любая запись со словом вроде "едем" открывала газету
+            // или укладывала игрока спать прямо во время набора текста
+            if (PlayerInRange && !GameplayInputLock.Blocked && Input.GetKeyDown(_interactKey))
                 Interact();
         }
 

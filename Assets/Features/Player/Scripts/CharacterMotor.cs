@@ -85,10 +85,8 @@ namespace GamePhone.Movement
         private Vector3 ReadMoveDirection()
         {
             if (_cameraMode == null) return Vector3.zero;
+            if (GameplayInputLock.Blocked) return Vector3.zero;
 
-            if (UIFocusState.IsTypingInField()) return Vector3.zero;
-            if (PhoneUIController.Instance != null && PhoneUIController.Instance.IsOpen) return Vector3.zero;
-            if (CursorRequestState.AnyRequested) return Vector3.zero;
             Vector2 rawInput = _controls.Gameplay.Move.ReadValue<Vector2>();
 
             Vector3 moveDir = _cameraMode.GetMoveDirection(rawInput);
@@ -119,7 +117,7 @@ namespace GamePhone.Movement
 
             if (grounded && _verticalVelocity < 0f)
                 _verticalVelocity = -2f;
-            if (grounded && _controls.Gameplay.Jump.WasPressedThisFrame())
+            if (grounded && !GameplayInputLock.Blocked && _controls.Gameplay.Jump.WasPressedThisFrame())
             {
                 _verticalVelocity = Mathf.Sqrt(_jumpHeight * -2f * _gravity);
             }
