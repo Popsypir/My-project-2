@@ -54,6 +54,21 @@ namespace GamePhone.Warehouse
         [SerializeField] private Van _van;
         [Tooltip("Фургон стоит у ворот весь день или приезжает только под вечер")]
         [SerializeField] private bool _vanArrivesAtEnd = true;
+        [Tooltip("Сколько секунд даётся на погрузку после приезда фургона. " +
+                 "0 или меньше - фургон ждёт, пока его не отправят вручную (SendVanAway)")]
+        [SerializeField] private float _vanLoadingTime = 60f;
+
+        [Header("Оплата")]
+        [Tooltip("За каждую принятую у посетителя посылку")]
+        [SerializeField] private float _payPerParcelAccepted = 20f;
+        [Tooltip("За каждую выданную посылку")]
+        [SerializeField] private float _payPerReceiverServed = 30f;
+        [Tooltip("За каждую посылку, увезённую фургоном")]
+        [SerializeField] private float _payPerParcelShipped = 15f;
+        [Tooltip("Штраф за каждого, кто ушёл ни с чем. Пишется положительным числом")]
+        [SerializeField] private float _finePerReceiverGaveUp = 40f;
+        [Tooltip("Ниже нуля зарплата не опускается - в минус игрок не уходит")]
+        [SerializeField] private bool _clampSalaryToZero = true;
 
         public int ParcelsDelivered { get; private set; }
         public int ReceiversServed { get; private set; }
@@ -62,9 +77,45 @@ namespace GamePhone.Warehouse
         public bool IsShiftOver { get; private set; }
         public float TimeLeft => Mathf.Max(0f, _shiftEndTime - Time.time);
 
+        /// <summary>Фургон приехал и ещё не уехал - идёт погрузка.</summary>
+        public bool IsLoadingVan { get; private set; }
+
+        /// <summary>Сколько секунд осталось на погрузку. Без ограничения времени - 0.</summary>
+        public float VanTimeLeft => IsLoadingVan && _vanLoadingTime > 0f
+            ? Mathf.Max(0f, _vanDepartTime - Time.time)
+            : 0f;
+
+        /// <summary>Рабочий день кончился: пора грузить фургон.</summary>
+        public event System.Action OnShiftEnded;
+
+        /// <summary>Фургон встал под погрузку.</summary>
+        public event System.Action OnVanArrived;
+
+        /// <summary>Фургон уехал - смена закрыта, пора показывать итоги.</summary>
+        public event System.Action OnVanDeparted;
+
+        /// <summary>
+        /// Заработок за смену: за принятые, выданные и увезённые посылки,
+        /// минус штраф за тех, кто ушёл ни с чем.
+        /// </summary>
+        public float Salary
+        {
+            get
+            {
+                float sum = ParcelsDelivered * _payPerParcelAccepted
+                          + ReceiversServed * _payPerReceiverServed
+                          + ParcelsShipped * _payPerParcelShipped
+                          - ReceiversGaveUp * Mathf.Abs(_finePerReceiverGaveUp);
+
+                return _clampSalaryToZero ? Mathf.Max(0f, sum) : sum;
+            }
+        }
+
         private int _activeNpc;
         private int _spawnedTotal;
         private float _shiftEndTime;
+        private float _vanDepartTime;
+        private bool _vanSentAway;
 
         private void Start()
         {
@@ -199,6 +250,16 @@ namespace GamePhone.Warehouse
         /// <summary>Номер в очереди: 0 - сейчас его обслуживают.</summary>
         public int QueueIndexOf(PostNpc npc) => _queue.IndexOf(npc);
 
+        /// <summary>Кто сейчас стоит у стойки. Никого - null.</summary>
+        public PostNpc NpcAtCounter
+        {
+            get
+            {
+                PurgeQueue();
+                return _queue.Count > 0 ? _queue[0] : null;
+            }
+        }
+
         /// <summary>Обслуживают только того, кто стоит первым.</summary>
         public bool IsAtCounter(PostNpc npc)
         {
@@ -216,19 +277,73 @@ namespace GamePhone.Warehouse
             if (IsShiftOver) return;
             IsShiftOver = true;
 
-            if (_van != null && _vanArrivesAtEnd)
-                _van.gameObject.SetActive(true);
-
             Debug.Log($"[Почта] Смена окончена. Принято посылок: {ParcelsDelivered}, " +
                       $"выдано: {ReceiversServed}, ушли ни с чем: {ReceiversGaveUp}");
+
+            OnShiftEnded?.Invoke();
+
+            if (_van == null)
+            {
+                // Фургона в сцене нет - грузить нечего, сразу закрываем смену,
+                // иначе итоги смены никто никогда не покажет
+                OnVanDeparted?.Invoke();
+                return;
+            }
+
+            _van.OnArrived += HandleVanArrived;
+            _van.OnDeparted += HandleVanDeparted;
+
+            if (_vanArrivesAtEnd) _van.Arrive();
+            else HandleVanArrived();   // стоял у ворот весь день - грузить можно прямо сейчас
         }
 
-        /// <summary>Фургон уезжает - увозит всё, что в него влезло.</summary>
+        private void HandleVanArrived()
+        {
+            if (IsLoadingVan) return;
+
+            IsLoadingVan = true;
+            _vanDepartTime = Time.time + _vanLoadingTime;
+            OnVanArrived?.Invoke();
+
+            if (_vanLoadingTime > 0f)
+                StartCoroutine(VanLoadingTimer());
+        }
+
+        private IEnumerator VanLoadingTimer()
+        {
+            yield return new WaitForSeconds(_vanLoadingTime);
+            SendVanAway();
+        }
+
+        private void HandleVanDeparted()
+        {
+            IsLoadingVan = false;
+
+            // Отписываемся: фургон уехал, второй раз он уже не приедет, а
+            // оставленная подписка продолжала бы держать смену в памяти
+            if (_van != null)
+            {
+                _van.OnArrived -= HandleVanArrived;
+                _van.OnDeparted -= HandleVanDeparted;
+            }
+
+            OnVanDeparted?.Invoke();
+        }
+
+        /// <summary>
+        /// Фургон уезжает - увозит всё, что в него влезло. Вызывается сам по
+        /// истечении времени погрузки, но можно дёрнуть и раньше: например,
+        /// кнопкой у ворот, если игрок всё загрузил и ждать не хочет.
+        /// </summary>
         public void SendVanAway()
         {
-            if (_van == null) return;
+            // Защита от второго вызова: иначе счётчик увезённых посылок
+            // обнулился бы вторым Depart(), и зарплата за них пропала
+            if (_van == null || _vanSentAway) return;
+            _vanSentAway = true;
+
             ParcelsShipped = _van.Depart();
-            Debug.Log($"[Почта] Фургон увёз посылок: {ParcelsShipped}");
+            Debug.Log($"[Почта] Фургон увёз посылок: {ParcelsShipped}. Зарплата за смену: {Salary:0}");
         }
     }
 }

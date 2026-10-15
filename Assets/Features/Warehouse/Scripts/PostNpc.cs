@@ -64,6 +64,9 @@ namespace GamePhone.Warehouse
         private bool _atCounter;
         private bool _served;
         private bool _leaving;
+        private Coroutine _moveRoutine; // Ссылка на текущую корутину движения для перезапуска
+        private bool _slotReached;      // Дошли до своего места в очереди и стоим на нём
+        private bool _falling;          // Провалился в люк и летит вниз
 
         public void Begin(PostOfficeShift shift, NpcKind kind, Transform counterPoint, Transform exitPoint, Box carriedBox,
                           string requestedName = null)
@@ -175,10 +178,6 @@ namespace GamePhone.Warehouse
         // коллайдеры пропускаем - иначе луч упирается в его же капсулу.
         private void SnapToGround()
         {
-            // Луч пускаем чуть выше НОГ, а не выше головы: если начинать высоко,
-            // то стоит посетителю оказаться у края помещения - и луч первым
-            // задевает крышу сверху, посетитель встаёт на неё, в следующий раз
-            // луч стартует ещё выше, и так он уезжает в небо.
             Vector3 feet = transform.position + Vector3.down * _feetOffset;
             Vector3 from = feet + Vector3.up * 0.6f;
             var hits = Physics.RaycastAll(from, Vector3.down, 6f, ~0, QueryTriggerInteraction.Ignore);
@@ -206,26 +205,31 @@ namespace GamePhone.Warehouse
         {
             // Встаём в хвост очереди и ждём, пока не подойдём к стойке первыми.
             _shift?.JoinQueue(this);
-            yield return WalkToQueueSlot();
+            _moveRoutine = StartCoroutine(WalkToQueueSlot());
 
-            while (_shift != null && !_shift.IsAtCounter(this))
-                yield return WalkToQueueSlot();
+            // Ждём кадрами, а НЕ через «yield return _moveRoutine». Когда очередь
+            // сдвигается, MoveToQueueSlot останавливает корутину движения и пускает
+            // новую - а остановленная корутина не завершается никогда. Ожидание на
+            // её объекте висело бы вечно: такой посетитель навсегда оставался бы
+            // «не у стойки» и не отдавал посылку. Это и был баг «коробку берут не у всех»:
+            // попадались только те, чьё место в очереди сменилось на ходу.
+            while (_shift != null && (!_shift.IsAtCounter(this) || !_slotReached))
+            {
+                // Подстраховка: стоим на месте, а место уже не наше - идём снова
+                if (_slotReached && !AtOwnQueueSlot())
+                    RestartWalkToSlot();
+
+                yield return null;
+            }
 
             _atCounter = true;
 
             if (Kind == NpcKind.Sender)
             {
-                // Стоит у стойки и держит посылку, пока игрок её не заберёт (см.
-                // TakeParcel). Сам не уйдёт и на стойку ничего не выкладывает.
                 while (!_served) yield return null;
             }
             else
             {
-                // Ждёт свою посылку. _patience = 0 - ждёт сколько угодно.
-                //
-                // Но если его посылку увезли фургоном, отдать ему уже нечего:
-                // он обязан уйти, иначе будет вечно стоять первым и держать
-                // всю очередь, и вручить посылку станет некому.
                 float waited = 0f;
                 float missing = 0f;
                 while (!_served && (_patience <= 0f || waited < _patience))
@@ -260,7 +264,27 @@ namespace GamePhone.Warehouse
         public void SetFont(TMPro.TMP_FontAsset font) => _nameTagFont = font;
 
         /// <summary>Очередь сдвинулась - идём на своё новое место.</summary>
-        public void MoveToQueueSlot(int index) => _queueSlot = index;
+        public void MoveToQueueSlot(int index)
+        {
+            _queueSlot = index;
+
+            // Если NPC уже идёт к стойке или ждёт, но ещё не начал уходить,
+            // прерываем текущий путь и перенаправляем в новый слот очереди.
+            // VisitRoutine при этом ждёт кадрами, а не эту корутину: остановленная
+            // корутина не завершается, и ожидание на ней зависло бы навсегда.
+            if (_shift != null && !_leaving && !_atCounter)
+                RestartWalkToSlot();
+        }
+
+        // Пойти на своё место заново. Флаг «дошёл» обязательно сбрасываем здесь:
+        // иначе он остался бы с прошлого места, и посетителя сочли бы стоящим
+        // у стойки, пока он ещё шагает к ней с середины очереди
+        private void RestartWalkToSlot()
+        {
+            _slotReached = false;
+            if (_moveRoutine != null) StopCoroutine(_moveRoutine);
+            _moveRoutine = StartCoroutine(WalkToQueueSlot());
+        }
 
         // Идёт на своё место в очереди. Место может смениться прямо по дороге
         // (кого-то обслужили и очередь сдвинулась), поэтому цель каждый кадр
@@ -270,6 +294,7 @@ namespace GamePhone.Warehouse
             if (_shift == null) yield break;
 
             _queueSlot = _shift.QueueIndexOf(this);
+            _slotReached = false;
             SetWalking(true);
 
             while (_shift != null)
@@ -298,6 +323,20 @@ namespace GamePhone.Warehouse
 
             SetWalking(false);
             Physics.SyncTransforms();
+            _slotReached = true;
+        }
+
+        // Стоим ли мы на своём нынешнем месте в очереди
+        private bool AtOwnQueueSlot()
+        {
+            if (_shift == null) return true;
+
+            int slot = _shift.QueueIndexOf(this);
+            if (slot < 0) return true;
+
+            Vector3 to = _shift.QueueSlotPosition(slot) - transform.position;
+            to.y = 0f;
+            return to.magnitude <= _stopDistance;
         }
 
         private IEnumerator WalkTo(Transform target)
@@ -319,12 +358,57 @@ namespace GamePhone.Warehouse
             }
 
             SetWalking(false);
-
-            // Пришли на место - подтягиваем физику за трансформом. Без этого
-            // коллайдер посетителя до следующего шага физики остаётся там, откуда
-            // он вышел, и игра не находит его у стойки: вручить посылку нельзя.
             Physics.SyncTransforms();
         }
+
+        /// <summary>
+        /// Посетитель провалился в люк (см. CounterTrapdoor). Падает он скриптом,
+        /// а не физикой: Rigidbody у него кинематический (иначе гравитация дерётся
+        /// со скриптовой ходьбой), и включать физику на лету - значит получить
+        /// посетителя, застрявшего в полу или улетевшего сквозь стену.
+        /// </summary>
+        public void FallThrough(float depth, float gravity)
+        {
+            if (_falling) return;
+            _falling = true;
+
+            // Все его дела останавливаем: иначе VisitRoutine продолжил бы ходить
+            // и каждый кадр возвращал бы его на пол (см. SnapToGround)
+            StopAllCoroutines();
+            _atCounter = false;
+            _leaving = true;
+            SetWalking(false);
+
+            // Из очереди убираем сразу, не дожидаясь конца падения: следующий
+            // должен шагнуть к стойке, пока этот ещё летит
+            _shift?.LeaveQueue(this);
+
+            // Сквозь пол он пролетит только без коллайдеров: иначе зацепится
+            // за створки люка или за стойку
+            foreach (var c in GetComponentsInChildren<Collider>(true)) c.enabled = false;
+
+            StartCoroutine(FallRoutine(depth, gravity));
+        }
+
+        private IEnumerator FallRoutine(float depth, float gravity)
+        {
+            float startY = transform.position.y;
+            float speed = 0f;
+
+            while (startY - transform.position.y < depth)
+            {
+                speed += gravity * Time.deltaTime;
+                transform.position += Vector3.down * speed * Time.deltaTime;
+                yield return null;
+            }
+
+            // Посылка падает вместе с ним - принять её уже не выйдет
+            if (_carriedBox != null) Destroy(_carriedBox.gameObject);
+            Destroy(gameObject);
+        }
+
+        /// <summary>Уже падает - второй раз в люк не отправить.</summary>
+        public bool IsFalling => _falling;
 
         private void SetWalking(bool walking)
         {
@@ -332,12 +416,8 @@ namespace GamePhone.Warehouse
                 _animator.SetBool(_isWalkingParam, walking);
         }
 
-        // Считается и обычный уход, и если объект убрали досрочно (конец смены,
-        // выход из Play Mode) - иначе счётчик посетителей поехал бы.
         private void OnDestroy()
         {
-            // Обязательно вынуть из очереди: иначе на его месте навсегда остаётся
-            // "призрак", очередь растёт назад, и новые посетители до стойки не доходят.
             _shift?.LeaveQueue(this);
             _shift?.NotifyNpcGone();
         }
