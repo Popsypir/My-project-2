@@ -66,7 +66,7 @@ namespace GamePhone.Apps
         // Кнопка "Нет"
         public void Cancel()
         {
-            Openmenu.CloseExit();
+            Openmenu.OpenMenus(3);
             SetVisible(false);
             PhoneUIController.Instance?.SetInputEnabled(true);
         }

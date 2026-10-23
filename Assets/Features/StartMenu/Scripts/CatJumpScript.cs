@@ -8,8 +8,13 @@ public class CatJumpScript : MonoBehaviour
     [SerializeField] private GameObject cat1;
     [SerializeField] private GameObject cat2;
 
+    [SerializeField, Range(0f, 1f)] private float soundVolume = 0.3f;
+
     [Header("Audio Settings")]
-    [SerializeField] private AudioClip jumpSound; // Звук прыжка/падения
+    [SerializeField] private AudioClip jumpSound;
+
+    [SerializeField] private AudioClip[] MonSounds;
+    // Звук прыжка/падения
 
     private AudioSource audioSource;
     private bool isAnimating = false; // Защита от спама анимации
@@ -40,14 +45,28 @@ public class CatJumpScript : MonoBehaviour
 
         if (targetCat != null)
         {
-            // 1. Проигрываем звук в самом начале
-            if (jumpSound != null && audioSource != null)
+            if (index == 0)
             {
-                audioSource.PlayOneShot(jumpSound);
-            }
+                // 1. Проигрываем звук в самом начале
+                if (jumpSound != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(jumpSound);
+                }
 
-            // 2. Запускаем анимацию
-            StartCoroutine(AnimateComicalJump(targetCat));
+                // 2. Запускаем анимацию
+                StartCoroutine(AnimateComicalJump(targetCat));
+            }
+            else
+            {
+                if (audioSource.isPlaying) return;
+                if (MonSounds == null || MonSounds.Length == 0) return;
+
+                int randomIndex = Random.Range(0, MonSounds.Length);
+                audioSource.clip = MonSounds[randomIndex];
+                audioSource.volume = soundVolume;
+                audioSource.Play();
+            }
+            
         }
         else
         {
