@@ -4,20 +4,6 @@ using UnityEngine;
 
 namespace GamePhone.Apps
 {
-    /// <summary>
-    /// Приложение "Выход": сначала экран с подтверждением ("Да" / "Нет"), при
-    /// согласии - экран плавно гаснет (см. ScreenFader), на чёрном фоне ненадолго
-    /// появляется прощальная надпись (одна из FarewellMessages - меняются прямо
-    /// в инспекторе), и только после этого игра реально закрывается. В редакторе
-    /// Unity вместо реального выхода останавливает Play Mode, чтобы можно было
-    /// тестировать.
-    ///
-    /// Сам диалог - это НЕ экран внутри маленькой карточки телефона (якоря не
-    /// могут выйти за пределы родителя), а отдельный объект прямо на Canvas
-    /// сцены (как ScreenFader/Hightscreen), растянутый на весь экран. Иконка
-    /// "Выход" в телефоне вызывает Instance.Show() напрямую (см.
-    /// ExitButtonHandler) - без AppIconUI и PhoneScreenManager.
-    /// </summary>
     public class ExitGameApp : MonoBehaviour
     {
 
@@ -53,17 +39,12 @@ namespace GamePhone.Apps
         public void Show()
         {
             SetVisible(true);
-            // Кнопки могли остаться сдвинутыми/оглушёнными и с вырванными буквами
-            // с прошлого открытия - GameObject-ы не выключаются, Update не сбрасывает их сам
             foreach (var btn in GetComponentsInChildren<DodgingButton>(true))
                 btn.ResetState();
             foreach (var sentence in GetComponentsInChildren<ThrowableSentence>(true))
                 sentence.ResetState();
-            // Пока диалог открыт - Escape не должен закрывать сам телефон под ним
             PhoneUIController.Instance?.SetInputEnabled(false);
         }
-
-        // Кнопка "Нет"
         public void Cancel()
         {
             Openmenu.OpenMenus(3);
@@ -78,8 +59,6 @@ namespace GamePhone.Apps
             _rootGroup.interactable = visible;
             _rootGroup.blocksRaycasts = visible;
         }
-
-        // Кнопка "Да" на экране подтверждения
         public void ConfirmExit()
         {
             StartCoroutine(ExitRoutine());

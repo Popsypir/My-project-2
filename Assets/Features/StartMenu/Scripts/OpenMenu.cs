@@ -27,13 +27,10 @@ public class OpenMenu : MonoBehaviour
     [SerializeField] private GameObject exitButton;
     [SerializeField] private GameObject mpGamesButton;
     [SerializeField] private GameObject loadGamesButton;
-
-    // Храним оригинальные тексты, чтобы не хардкодить их в switch
     private string[] originalTexts = new string[6];
 
     void Start()
     {
-        // Сохраняем исходные тексты кнопок при запуске
         if (settingsTextButton != null) originalTexts[1] = settingsTextButton.text;
         if (authorsTextButton != null) originalTexts[2] = authorsTextButton.text;
         if (exitTextButton != null) originalTexts[3] = exitTextButton.text;
@@ -96,8 +93,6 @@ public class OpenMenu : MonoBehaviour
         {
             isIndex = 0;
         }
-
-        // Сбрасываем выделение при закрытии
         EventSystem.current.SetSelectedGameObject(null);
     }
 
@@ -114,7 +109,6 @@ public class OpenMenu : MonoBehaviour
 
     private void Update()
     {
-        // Управление выделением кнопок через EventSystem
         if (isIndex != 0)
         {
             GameObject targetButton = GetButtonByIndex(isIndex);
@@ -123,16 +117,12 @@ public class OpenMenu : MonoBehaviour
                 EventSystem.current.SetSelectedGameObject(targetButton);
             }
         }
-
-        // Закрытие по Escape
         if (Input.GetKeyDown(KeyCode.Escape) && isIndex != 0)
         {
             Close(isIndex);
             isIndex = 0;
         }
     }
-
-    // --- Вспомогательные методы для чистоты кода (замена громоздких switch) ---
 
     private PanelAnimator GetAnimatorByIndex(int index)
     {
@@ -170,6 +160,22 @@ public class OpenMenu : MonoBehaviour
             case 4: return mpGamesButton;
             case 5: return loadGamesButton;
             default: return null;
+        }
+    }
+
+    public void OpenLink(int index)
+    {
+        switch (index)
+        {
+            case 1:
+                Application.OpenURL("https://www.youtube.com/@Popsypir");
+                break;
+            case 2:
+                Application.OpenURL("https://github.com/Popsypir/My-project-2");
+                break;
+            case 3:
+                Application.OpenURL("https://t.me/KartonPop");
+                break;
         }
     }
 }

@@ -5,11 +5,10 @@ public class TitleAnimation : MonoBehaviour
 {
     private bool is_anim = false;
 
-    // ==================== НАПРАВЛЕНИЕ АНИМАЦИИ ====================
     public enum AnimDirection
     {
-        FromLeft,   // Вылетает слева
-        FromBottom  // Вылетает снизу
+        FromLeft,
+        FromBottom 
     }
 
     [System.Serializable]
@@ -21,8 +20,7 @@ public class TitleAnimation : MonoBehaviour
         public float delay = 0f;
     }
 
-    // ==================== ЗАГОЛОВОК ====================
-    [Header("=== ЗАГОЛОВОК ===")]
+    [Header("Заголовки")]
     [SerializeField] private RectTransform projectText;
     [SerializeField] private RectTransform myText;
 
@@ -40,8 +38,6 @@ public class TitleAnimation : MonoBehaviour
     [Header("Кривые заголовка")]
     [SerializeField] private AnimationCurve projectEase = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [SerializeField] private AnimationCurve myFallEase = AnimationCurve.EaseInOut(0, 0, 1, 1);
-
-    // ==================== КНОПКИ ====================
     [Header("=== КНОПКИ МЕНЮ ===")]
     [SerializeField] private ButtonAnimData[] buttons;
 
@@ -49,27 +45,24 @@ public class TitleAnimation : MonoBehaviour
     [SerializeField] private float buttonFlyDuration = 0.6f;
     [SerializeField] private float buttonStartOffsetLeft = -800f;
     [SerializeField] private float buttonStartOffsetBottom = -600f;
-    [SerializeField] private float staggerDelay = 0.12f; // задержка между кнопками
-    [SerializeField] private float delayBeforeButtons = 0.5f; // задержка после заголовка
+    [SerializeField] private float staggerDelay = 0.12f; 
+    [SerializeField] private float delayBeforeButtons = 0.5f;
 
     [Header("Кривые кнопок")]
     [SerializeField] private AnimationCurve buttonEase = AnimationCurve.EaseInOut(0, 0, 0.5f, 1f);
-
-    // ==================== ВНУТРЕННИЕ ПЕРЕМЕННЫЕ ====================
     private Vector3 projectFinalPos;
     private Vector3 myFinalPos;
     private Vector3[] buttonsFinalPos;
 
     void Start()
     {
-        // --- Заголовок ---
         projectFinalPos = projectText.anchoredPosition;
         myFinalPos = myText.anchoredPosition;
 
         projectText.anchoredPosition = projectFinalPos + new Vector3(projectStartOffsetX, 0, 0);
         myText.anchoredPosition = myFinalPos + new Vector3(0, myStartOffsetY, 0);
 
-        // --- Кнопки ---
+ 
         buttonsFinalPos = new Vector3[buttons.Length];
         for (int i = 0; i < buttons.Length; i++)
         {
@@ -79,42 +72,30 @@ public class TitleAnimation : MonoBehaviour
             {
                 buttons[i].button.anchoredPosition = buttonsFinalPos[i] + new Vector3(buttonStartOffsetLeft, 0, 0);
             }
-            else // FromBottom
+            else
             {
                 buttons[i].button.anchoredPosition = buttonsFinalPos[i] + new Vector3(0, buttonStartOffsetBottom, 0);
             }
-
-            // Скрываем кнопки до начала анимации
             buttons[i].button.gameObject.SetActive(false);
         }
-
-        // Запуск
         StartCoroutine(AnimateAll());
     }
 
     private IEnumerator AnimateAll()
     {
         is_anim = true;
-        // 1. Анимация заголовка
         yield return StartCoroutine(AnimateTitle());
-
-        // 2. Задержка перед кнопками
         yield return new WaitForSeconds(delayBeforeButtons);
-
-        // 3. Анимация кнопок
         yield return StartCoroutine(AnimateButtons());
         is_anim = false;
     }
 
-    // ==================== АНИМАЦИЯ ЗАГОЛОВКА ====================
     private IEnumerator AnimateTitle()
     {
         yield return StartCoroutine(FlyInFromLeft(projectText, projectFinalPos, projectFlyDuration));
         yield return new WaitForSeconds(delayBeforeMy);
         yield return StartCoroutine(FallWithBounce(myText, myFinalPos, myFallDuration));
     }
-
-    // ==================== АНИМАЦИЯ КНОПОК ====================
     private IEnumerator AnimateButtons()
     {
         for (int i = 0; i < buttons.Length; i++)
@@ -137,8 +118,6 @@ public class TitleAnimation : MonoBehaviour
             yield return new WaitForSeconds(staggerDelay);
         }
     }
-
-    // ==================== КОРУТИНЫ АНИМАЦИЙ ====================
 
     private IEnumerator FlyInFromLeft(RectTransform target, Vector3 finalPos, float duration)
     {

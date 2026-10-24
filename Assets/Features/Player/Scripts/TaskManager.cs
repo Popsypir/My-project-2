@@ -34,10 +34,6 @@ public class TaskManager : MonoBehaviour
         public string title;
         public string description;
     }
-
-    // Список игровых задач и прогресс по ним - их показывает приложение "Дела"
-    // в телефоне (TodoApp). Статические, потому что телефон есть и на сценах
-    // без TaskManager (магазин, почта) - там прогресс берётся из сохранения
     public static readonly TaskData[] DefaultTasks =
     {
         new TaskData { title = "За работу!", description = "Прочитать газету" },
@@ -45,12 +41,8 @@ public class TaskManager : MonoBehaviour
         new TaskData { title = "За работу!", description = "Поспать перед первой\nсменой" },
         new TaskData { title = "Первая смена", description = "Завершить смену" }
     };
-
     public static event System.Action ProgressChanged;
-
     private static int _liveProgress = -1;
-
-    // Индекс текущей задачи - все задачи до него уже выполнены
     public static int Progress => _liveProgress >= 0 ? _liveProgress : SaveSystem.LoadTaskProgress();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -92,8 +84,6 @@ public class TaskManager : MonoBehaviour
                 isPanelMoving = false;
             }
         }
-        // Tab в текстовом поле переводит курсор между полями - дёргать
-        // панель задач в этот момент не надо
         if (Input.GetKeyDown(KeyCode.Tab) && !isPanelMoving && !GamePhone.GameplayInputLock.Blocked)
         {
             if (!isPanelHidden)

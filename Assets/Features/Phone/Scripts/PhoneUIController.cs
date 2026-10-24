@@ -4,11 +4,6 @@ using UnityEngine;
 
 namespace GamePhone
 {
-    /// <summary>
-    /// Отвечает ТОЛЬКО за одно: показать/скрыть панель телефона с анимацией
-    /// выезда снизу экрана и обработать ввод (Escape). Ничего не знает
-    /// о приложениях, иконках и т.д. — за это отвечают другие классы.
-    /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public class PhoneUIController : MonoBehaviour
     {
@@ -29,10 +24,6 @@ namespace GamePhone
 
     
         [SerializeField] private CanvasGroup mainMenuButtons;
-
-        // Позволяет снаружи временно заблокировать реакцию на _toggleKey (например,
-        // пока поверх экрана показано своё окно паузы мини-игры - см. PongApp) -
-        // чтобы повторный Escape не открывал телефон обратно сам по себе.
         private bool _inputEnabled = true;
 
         public bool IsOpen { get; private set; }
@@ -52,8 +43,6 @@ namespace GamePhone
                 return;
             }
             Instance = this;
-
-            // Панель прячем ровно на её собственную высоту вниз от исходной позиции.
             _shownPos = _panel.anchoredPosition;
             _hiddenPos = _shownPos + new Vector2(0f, -_panel.rect.height);
 
@@ -68,8 +57,6 @@ namespace GamePhone
                     Toggle();
                 }
         }
-
-        // См. комментарий у _inputEnabled выше
         public void SetInputEnabled(bool enabled)
         {
             _inputEnabled = enabled;
@@ -107,16 +94,14 @@ namespace GamePhone
 
         private IEnumerator AnimatePanel(Vector2 from, Vector2 to, bool interactableAtEnd)
         {
-            // Панель видна (alpha = 1) всё время движения — едет как есть, без затухания.
             _canvasGroup.alpha = 1f;
             _canvasGroup.blocksRaycasts = true;
 
             float t = 0f;
             while (t < _animDuration)
             {
-                // unscaledDeltaTime — чтобы телефон анимировался, даже если игра на паузе (Time.timeScale = 0)
                 t += Time.unscaledDeltaTime;
-                float k = Mathf.Clamp01(t / _animDuration); // линейно, без кривой ускорения
+                float k = Mathf.Clamp01(t / _animDuration);
 
                 _panel.anchoredPosition = Vector2.Lerp(from, to, k);
 
@@ -126,7 +111,6 @@ namespace GamePhone
             _panel.anchoredPosition = to;
             _canvasGroup.interactable = interactableAtEnd;
             _canvasGroup.blocksRaycasts = interactableAtEnd;
-            // Прячем панель мгновенно (не через плавное затухание), когда она уже уехала вниз
             _canvasGroup.alpha = interactableAtEnd ? 1f : 0f;
         }
 
