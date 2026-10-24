@@ -34,6 +34,18 @@ public class DayManager : GameDayProviderBase
         PendingJob = job;
     }
 
+    public void SetPendingJobFromSave(PhoneNumberEntry job)
+    {
+        if (job == null)
+        {
+            Debug.LogWarning("[DayManager] Попытка установить null работу из сохранения");
+            return;
+        }
+
+        PendingJob = job;
+        Debug.Log($"[DayManager] Восстановлена работа из сохранения: {job.Label} ({job.Number})");
+    }
+
     private void Awake()
     {
         if (Instance == null)

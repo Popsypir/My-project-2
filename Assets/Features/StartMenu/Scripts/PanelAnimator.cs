@@ -53,7 +53,6 @@ public class PanelAnimator : MonoBehaviour
         if (isOpen) return;
         if (currentCoroutine != null) StopCoroutine(currentCoroutine);
 
-        // Если анимация отключена, применяем состояние мгновенно
         if (!useAnimation)
         {
             ApplyInstantState(true);
@@ -68,7 +67,6 @@ public class PanelAnimator : MonoBehaviour
         if (!isOpen) return;
         if (currentCoroutine != null) StopCoroutine(currentCoroutine);
 
-        // Если анимация отключена, применяем состояние мгновенно
         if (!useAnimation)
         {
             ApplyInstantState(false);
@@ -78,9 +76,14 @@ public class PanelAnimator : MonoBehaviour
         currentCoroutine = StartCoroutine(AnimateClose());
     }
 
-    /// <summary>
-    /// Мгновенное применение состояния без корутин
-    /// </summary>
+    // НОВЫЙ МЕТОД: Мгновенное закрытие без анимации (для переключения между меню)
+    public void CloseInstant()
+    {
+        if (!isOpen) return;
+        if (currentCoroutine != null) StopCoroutine(currentCoroutine);
+        ApplyInstantState(false);
+    }
+
     private void ApplyInstantState(bool open)
     {
         isOpen = open;
@@ -118,7 +121,6 @@ public class PanelAnimator : MonoBehaviour
 
         float elapsed = 0f;
 
-        // ФАЗА 1: Полет тонкой линией к точке стыка
         float p1Duration = openDuration * 0.45f;
         while (elapsed < p1Duration)
         {
@@ -133,7 +135,6 @@ public class PanelAnimator : MonoBehaviour
             yield return null;
         }
 
-        // ФАЗА 2: Инерция (залет за стык)
         float p2Duration = openDuration * 0.20f;
         elapsed = 0f;
         Vector2 p2StartPos = new Vector2(jointX, startPos.y);
@@ -151,7 +152,6 @@ public class PanelAnimator : MonoBehaviour
             yield return null;
         }
 
-        // ФАЗА 3: Возврат и растяжение до максимума
         float p3Duration = openDuration * 0.35f;
         elapsed = 0f;
         Vector2 p3StartPos = new Vector2(overshootX, startPos.y);

@@ -30,7 +30,7 @@ public class StartGameApp : MonoBehaviour
     {
         string target = string.IsNullOrWhiteSpace(sceneName) ? targetSceneName : sceneName;
 
-        SaveSystem.DeleteSave();
+        TaskManager.StartNewGame();
 
         if (string.IsNullOrWhiteSpace(target))
         {

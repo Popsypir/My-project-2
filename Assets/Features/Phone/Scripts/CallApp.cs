@@ -57,10 +57,19 @@ namespace GamePhone.Apps
         private string _pressedDigit;
         private float _callElapsed;
 
+        public static CallApp Instance;
+
         private void Awake()
         {
             if (_audioSource == null)
                 _audioSource = GetComponent<AudioSource>();
+            Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+                Instance = null;
         }
 
         public override void OnOpen()
@@ -254,13 +263,11 @@ namespace GamePhone.Apps
             if (completed && !entry.InstantTeleport && !rejected)
             {
                 DayManager.Instance?.SetPendingJob(entry);
-
-                // Панель задач есть только в квартире: на работе (магазин, почта,
-                // охрана) поле taskManager пустое. Без этой проверки звонок с
-                // рабочей локации падал с ошибкой прямо посреди разговора - и
-                // экран звонка оставался висеть, потому что корутина обрывалась.
                 if (taskManager != null)
+                {
+                    taskManager.SetPendingJob(entry); // Сохраняет номер работы
                     taskManager.CompleteCurrentTask(1);
+                }
             }
 
             yield return new WaitForSecondsRealtime(_callEndedShowTime);

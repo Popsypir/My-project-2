@@ -27,6 +27,7 @@ public class OpenMenu : MonoBehaviour
     [SerializeField] private GameObject exitButton;
     [SerializeField] private GameObject mpGamesButton;
     [SerializeField] private GameObject loadGamesButton;
+
     private string[] originalTexts = new string[6];
 
     void Start()
@@ -47,11 +48,13 @@ public class OpenMenu : MonoBehaviour
     {
         if (isIndex == index)
         {
+            // Закрытие по той же кнопке или ESC -> С АНИМАЦИЕЙ
             Close(index);
             isIndex = 0;
         }
         else
         {
+            // Переключение на другую панель -> СТАРАЯ закрывается МГНОВЕННО
             CloseOtherMenus(index);
             Open(index);
         }
@@ -74,6 +77,7 @@ public class OpenMenu : MonoBehaviour
         }
     }
 
+    // Обычное закрытие (с анимацией, для ESC и кнопки "Назад")
     private void Close(int index)
     {
         PanelAnimator targetAnimator = GetAnimatorByIndex(index);
@@ -96,13 +100,31 @@ public class OpenMenu : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(null);
     }
 
+    // НОВЫЙ МЕТОД: Мгновенное закрытие (для замены одной панели на другую)
+    private void CloseInstant(int index)
+    {
+        PanelAnimator targetAnimator = GetAnimatorByIndex(index);
+        TextMeshProUGUI targetText = GetTextByIndex(index);
+
+        if (targetAnimator != null)
+        {
+            targetAnimator.CloseInstant(); // Вызываем мгновенное скрытие
+        }
+
+        if (targetText != null && index < originalTexts.Length)
+        {
+            targetText.text = originalTexts[index];
+        }
+    }
+
     private void CloseOtherMenus(int activeIndex)
     {
         for (int i = 1; i <= 5; i++)
         {
             if (i != activeIndex)
             {
-                Close(i);
+                // ИЗМЕНЕНО: теперь закрываем без анимации
+                CloseInstant(i);
             }
         }
     }
@@ -117,6 +139,8 @@ public class OpenMenu : MonoBehaviour
                 EventSystem.current.SetSelectedGameObject(targetButton);
             }
         }
+
+        // Закрытие по ESC всегда остается с анимацией
         if (Input.GetKeyDown(KeyCode.Escape) && isIndex != 0)
         {
             Close(isIndex);
