@@ -17,6 +17,7 @@ public static class SaveSystem
         public string lastTaskDescription;
         public string timestamp;
         public string pendingJobNumber = "";
+        public string lastSceneName = ""; // ← НОВОЕ: Имя последней сцены
     }
 
     [Serializable]
@@ -58,7 +59,8 @@ public static class SaveSystem
         File.WriteAllText(FilePath, json);
     }
 
-    public static int CreateNewSlot(string taskTitle, string taskDescription = "", string pendingJobNumber = "")
+    // Добавлен параметр lastSceneName
+    public static int CreateNewSlot(string taskTitle, string taskDescription = "", string pendingJobNumber = "", string lastSceneName = "Квартирка")
     {
         if (Container.slots.Count >= MAX_SLOTS)
             Container.slots.RemoveAt(0);
@@ -67,7 +69,6 @@ public static class SaveSystem
             Container.slots[i].slotIndex = i + 1;
 
         int newIndex = Container.slots.Count + 1;
-
         var slot = new SaveSlotData
         {
             slotIndex = newIndex,
@@ -75,17 +76,17 @@ public static class SaveSystem
             lastTaskTitle = taskTitle,
             lastTaskDescription = taskDescription,
             pendingJobNumber = pendingJobNumber,
+            lastSceneName = lastSceneName, // ← НОВОЕ
             timestamp = DateTime.Now.ToString("dd.MM.yyyy HH:mm")
         };
-
         Container.slots.Add(slot);
         SaveToFile();
-
         Debug.Log($"[SaveSystem] Создан слот #{newIndex}");
         return newIndex;
     }
 
-    public static void UpdateSlot(int slotIndex, int taskIndex, string taskTitle, string taskDescription = "", string pendingJobNumber = null)
+    // Добавлен параметр lastSceneName
+    public static void UpdateSlot(int slotIndex, int taskIndex, string taskTitle, string taskDescription = "", string pendingJobNumber = null, string lastSceneName = null)
     {
         var slot = Container.slots.Find(s => s.slotIndex == slotIndex);
         if (slot != null)
@@ -93,8 +94,13 @@ public static class SaveSystem
             slot.currentTaskIndex = taskIndex;
             slot.lastTaskTitle = taskTitle;
             slot.lastTaskDescription = taskDescription;
+
             if (pendingJobNumber != null)
                 slot.pendingJobNumber = pendingJobNumber;
+
+            if (lastSceneName != null) // ← НОВОЕ: обновляем сцену, только если она передана
+                slot.lastSceneName = lastSceneName;
+
             slot.timestamp = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
             SaveToFile();
         }
@@ -132,7 +138,8 @@ public static class SaveSystem
         if (Container.slots.Count > 0)
         {
             var last = Container.slots[Container.slots.Count - 1];
-            UpdateSlot(last.slotIndex, currentTaskIndex, last.lastTaskTitle, last.lastTaskDescription, last.pendingJobNumber);
+            // Передаем null для lastSceneName, чтобы не затирать её при простом сохранении прогресса задачи
+            UpdateSlot(last.slotIndex, currentTaskIndex, last.lastTaskTitle, last.lastTaskDescription, last.pendingJobNumber, null);
         }
     }
 
@@ -140,7 +147,8 @@ public static class SaveSystem
     {
         if (Container.slots.Count == 0) return;
         var last = Container.slots[Container.slots.Count - 1];
-        UpdateSlot(last.slotIndex, last.currentTaskIndex, last.lastTaskTitle, last.lastTaskDescription, pendingJobNumber);
+        // Аналогично, не трогаем lastSceneName
+        UpdateSlot(last.slotIndex, last.currentTaskIndex, last.lastTaskTitle, last.lastTaskDescription, pendingJobNumber, null);
     }
 
     public static string LoadPendingJobNumber()

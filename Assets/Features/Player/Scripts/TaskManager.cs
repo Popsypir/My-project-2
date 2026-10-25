@@ -20,12 +20,14 @@ public class TaskManager : MonoBehaviour
     private int currentTaskIndex = 0;
     private bool isPanelMoving = false;
     private bool isPanelHidden = false;
+
     private Vector3 visiblePos;
     private Vector3 hiddenPos;
     private Vector3 animStartPos;
     private Vector3 animTargetPos;
     private Color currentColor;
     private float moveTimer = 0f;
+
     private static int _activeSlotIndex = 0;
     private static TaskManager _instance;
 
@@ -77,7 +79,6 @@ public class TaskManager : MonoBehaviour
             currentTaskIndex = _liveProgress;
             Debug.Log($"[TaskManager] Загружено из слота #{_activeSlotIndex}, задача #{currentTaskIndex}, работа: '{_pendingJobNumber}'");
 
-            // Восстанавливаем работу в DayManager
             if (!string.IsNullOrEmpty(_pendingJobNumber) && currentTaskIndex >= 1 && currentTaskIndex < 3)
             {
                 RestorePendingJob();
@@ -125,10 +126,11 @@ public class TaskManager : MonoBehaviour
         string title = DefaultTasks.Length > 0 ? DefaultTasks[0].title : "Новая игра";
         string desc = DefaultTasks.Length > 0 ? DefaultTasks[0].description : "";
 
-        _activeSlotIndex = SaveSystem.CreateNewSlot(title, desc);
+        // При новой игре стартовая сцена всегда "Квартирка"
+        _activeSlotIndex = SaveSystem.CreateNewSlot(title, desc, "", "Квартирка");
+
         _liveProgress = 0;
         ProgressChanged?.Invoke();
-
         Debug.Log($"[TaskManager] Новая игра. Слот #{_activeSlotIndex}");
         SceneManager.LoadScene("Квартирка");
     }
@@ -139,16 +141,21 @@ public class TaskManager : MonoBehaviour
     public static void LoadFromSlot(SaveSystem.SaveSlotData slotData)
     {
         if (slotData == null) return;
+
         _activeSlotIndex = slotData.slotIndex;
         _liveProgress = slotData.currentTaskIndex;
-        _pendingJobNumber = slotData.pendingJobNumber ?? ""; // ← ДОБАВИТЬ
+        _pendingJobNumber = slotData.pendingJobNumber ?? "";
+
         ProgressChanged?.Invoke();
-        Debug.Log($"[TaskManager] Загрузка слота #{slotData.slotIndex} | Задача: {slotData.currentTaskIndex} | Работа: '{_pendingJobNumber}'");
-        SceneManager.LoadScene("Квартирка");
+        Debug.Log($"[TaskManager] Загрузка слота #{slotData.slotIndex} | Задача: {slotData.currentTaskIndex} | Работа: '{_pendingJobNumber}' | Сцена: '{slotData.lastSceneName}'");
+
+        // Защита от старых сохранений, где lastSceneName может быть пустым
+        string sceneToLoad = string.IsNullOrEmpty(slotData.lastSceneName) ? "Квартирка" : slotData.lastSceneName;
+        SceneManager.LoadScene(sceneToLoad);
     }
 
     // ═══════════════════════════════════════════
-    //  Сохранение выбранной работы
+    //  Сохранение выбранной работы и сцены
     // ═══════════════════════════════════════════
     public void SaveCurrentProgress()
     {
@@ -159,20 +166,30 @@ public class TaskManager : MonoBehaviour
         }
 
         int progressToSave = _liveProgress >= 0 ? _liveProgress : currentTaskIndex;
-
         string taskTitle = (progressToSave < tasks.Length)
             ? tasks[progressToSave].title : "Все задачи выполнены";
         string taskDesc = (progressToSave < tasks.Length)
             ? tasks[progressToSave].description : "";
 
-        SaveSystem.UpdateSlot(_activeSlotIndex, progressToSave, taskTitle, taskDesc, _pendingJobNumber);
+        // Получаем имя текущей сцены
+        string currentSceneName = SceneManager.GetActiveScene().name;
+
+        // ВАЖНО: Если игрок сейчас в меню, мы НЕ сохраняем "Menu" как последнюю сцену,
+        // чтобы при загрузке он вернулся в игровой мир, а не в меню.
+        if (currentSceneName == "Menu")
+        {
+            SaveSystem.UpdateSlot(_activeSlotIndex, progressToSave, taskTitle, taskDesc, _pendingJobNumber, null);
+        }
+        else
+        {
+            SaveSystem.UpdateSlot(_activeSlotIndex, progressToSave, taskTitle, taskDesc, _pendingJobNumber, currentSceneName);
+        }
     }
 
     public static void ExitToMenu()
     {
         if (_instance != null)
             _instance.SaveCurrentProgress();
-
         SceneManager.LoadScene("Menu");
     }
 
@@ -210,6 +227,7 @@ public class TaskManager : MonoBehaviour
         taskTitle.text = task.title;
         taskTitle.color = Color.gold;
         taskTitle.fontStyle = FontStyles.Normal;
+
         taskDescription.text = task.description.Trim();
         taskDescription.color = Color.white;
         taskDescription.fontStyle = FontStyles.Normal;
@@ -221,6 +239,7 @@ public class TaskManager : MonoBehaviour
     public void CompleteCurrentTask(int index)
     {
         if (currentTaskIndex >= tasks.Length) return;
+
         if (index == currentTaskIndex)
         {
             if (index == 2)
@@ -239,7 +258,6 @@ public class TaskManager : MonoBehaviour
             currentTaskIndex++;
             _liveProgress = currentTaskIndex;
             ProgressChanged?.Invoke();
-
             SaveCurrentProgress();
             Invoke(nameof(NextTask), 1.5f);
         }
@@ -255,12 +273,6 @@ public class TaskManager : MonoBehaviour
         SaveCurrentProgress();
     }
 
-    /// <summary>
-    /// Вызывается из CallApp при успешном звонке.
-    /// </summary>
-    /// <summary>
-    /// Вызывается из CallApp при успешном звонке.
-    /// </summary>
     public void SetPendingJob(GamePhone.PhoneNumberEntry job)
     {
         if (job == null) return;
@@ -269,17 +281,11 @@ public class TaskManager : MonoBehaviour
         Debug.Log($"[TaskManager] Сохранена работа: {job.Number} ({job.Label})");
     }
 
-    /// <summary>
-    /// Восстанавливает PendingJob в DayManager из сохранённого номера.
-    /// </summary>
     private void RestorePendingJob()
     {
         if (string.IsNullOrEmpty(_pendingJobNumber)) return;
 
-        // Пробуем CallApp.Instance сначала
         var callApp = GamePhone.Apps.CallApp.Instance;
-
-        // Если Instance null (объект неактивен), ищем через FindObjectOfType с includeInactive
         if (callApp == null)
         {
             callApp = FindObjectOfType<GamePhone.Apps.CallApp>(true);
@@ -291,9 +297,9 @@ public class TaskManager : MonoBehaviour
             return;
         }
 
-        // Ищем через рефлексию (поле _knownNumbers приватное)
         var field = typeof(GamePhone.Apps.CallApp).GetField("_knownNumbers",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
         if (field == null)
         {
             Debug.LogWarning("[TaskManager] Не удалось получить _knownNumbers");
@@ -315,7 +321,6 @@ public class TaskManager : MonoBehaviour
                 return;
             }
         }
-
         Debug.LogWarning($"[TaskManager] Работа '{_pendingJobNumber}' не найдена");
     }
 }
