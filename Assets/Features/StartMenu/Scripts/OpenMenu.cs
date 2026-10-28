@@ -8,11 +8,11 @@ public class OpenMenu : MonoBehaviour
     private int isIndex = 0;
 
     [Header("Аниматоры панелей (Drag & Drop сюда сами панели)")]
-    [SerializeField] private PanelAnimator settingsAnimator;
-    [SerializeField] private PanelAnimator creditsAnimator;
-    [SerializeField] private PanelAnimator exitAnimator;
-    [SerializeField] private PanelAnimator mpGamesAnimator;
-    [SerializeField] private PanelAnimator loadGamesAnimator;
+    [SerializeField] private FadePanelAnimator settingsAnimator;
+    [SerializeField] private FadePanelAnimator creditsAnimator;
+    [SerializeField] private FadePanelAnimator exitAnimator;
+    [SerializeField] private FadePanelAnimator mpGamesAnimator;
+    [SerializeField] private FadePanelAnimator loadGamesAnimator;
 
     [Header("Тексты кнопок")]
     [SerializeField] private TextMeshProUGUI authorsTextButton;
@@ -48,7 +48,7 @@ public class OpenMenu : MonoBehaviour
     {
         if (isIndex == index)
         {
-            // Закрытие по той же кнопке или ESC -> С АНИМАЦИЕЙ
+            // Закрытие по той же кнопке или ESC
             Close(index);
             isIndex = 0;
         }
@@ -63,12 +63,16 @@ public class OpenMenu : MonoBehaviour
     private void Open(int index)
     {
         isIndex = index;
-        PanelAnimator targetAnimator = GetAnimatorByIndex(index);
+        FadePanelAnimator targetAnimator = GetAnimatorByIndex(index);
         TextMeshProUGUI targetText = GetTextByIndex(index);
 
         if (targetAnimator != null)
         {
-            targetAnimator.PlayOpen();
+            // ИСКЛЮЧЕНИЕ: Панель выхода (индекс 3) открывается мгновенно, без плавной анимации
+            if (index == 3)
+                targetAnimator.gameObject.SetActive(true);
+            else
+                targetAnimator.PlayOpen();
         }
 
         if (targetText != null)
@@ -80,12 +84,16 @@ public class OpenMenu : MonoBehaviour
     // Обычное закрытие (с анимацией, для ESC и кнопки "Назад")
     private void Close(int index)
     {
-        PanelAnimator targetAnimator = GetAnimatorByIndex(index);
+        FadePanelAnimator targetAnimator = GetAnimatorByIndex(index);
         TextMeshProUGUI targetText = GetTextByIndex(index);
 
         if (targetAnimator != null)
         {
-            targetAnimator.PlayClose();
+            // ИСКЛЮЧЕНИЕ: Панель выхода (индекс 3) закрывается мгновенно
+            if (index == 3)
+                targetAnimator.gameObject.SetActive(false);
+            else
+                targetAnimator.PlayClose();
         }
 
         if (targetText != null && index < originalTexts.Length)
@@ -97,18 +105,19 @@ public class OpenMenu : MonoBehaviour
         {
             isIndex = 0;
         }
+
         EventSystem.current.SetSelectedGameObject(null);
     }
 
-    // НОВЫЙ МЕТОД: Мгновенное закрытие (для замены одной панели на другую)
+    // Мгновенное закрытие (для замены одной панели на другую)
     private void CloseInstant(int index)
     {
-        PanelAnimator targetAnimator = GetAnimatorByIndex(index);
+        FadePanelAnimator targetAnimator = GetAnimatorByIndex(index);
         TextMeshProUGUI targetText = GetTextByIndex(index);
 
         if (targetAnimator != null)
         {
-            targetAnimator.CloseInstant(); // Вызываем мгновенное скрытие
+            targetAnimator.CloseInstant();
         }
 
         if (targetText != null && index < originalTexts.Length)
@@ -123,7 +132,6 @@ public class OpenMenu : MonoBehaviour
         {
             if (i != activeIndex)
             {
-                // ИЗМЕНЕНО: теперь закрываем без анимации
                 CloseInstant(i);
             }
         }
@@ -140,7 +148,7 @@ public class OpenMenu : MonoBehaviour
             }
         }
 
-        // Закрытие по ESC всегда остается с анимацией
+        // Закрытие по ESC
         if (Input.GetKeyDown(KeyCode.Escape) && isIndex != 0)
         {
             Close(isIndex);
@@ -148,7 +156,7 @@ public class OpenMenu : MonoBehaviour
         }
     }
 
-    private PanelAnimator GetAnimatorByIndex(int index)
+    private FadePanelAnimator GetAnimatorByIndex(int index)
     {
         switch (index)
         {
