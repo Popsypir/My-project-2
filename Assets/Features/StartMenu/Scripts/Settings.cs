@@ -10,24 +10,26 @@ public class Settings : MonoBehaviour
 
     public void SetMainMenuMode()
     {
-        if (MainMenuButtons.alpha == 1)
-        {
-            MainMenuButtons.alpha = 0f;
-            MainMenuButtons.interactable = false;
-            MainMenuButtons.blocksRaycasts = false;
-            Phone.alpha = 1.0f;
-            Phone.interactable = true;
-            Phone.blocksRaycasts = true;
-        }
-        else
-        {
-            MainMenuButtons.alpha = 1f;
-            MainMenuButtons.interactable = true;
-            MainMenuButtons.blocksRaycasts = true;
-            Phone.alpha = 0f;
-            Phone.interactable = false;
-            Phone.blocksRaycasts = false;
-        }
+        Debug.LogError("[Settings] > SetMainMenuMode() - Временно отключено, т.к. телефон не используется в главном меню.");
+
+        //if (MainMenuButtons.alpha == 1)
+        //{
+        //    MainMenuButtons.alpha = 0f;
+        //    MainMenuButtons.interactable = false;
+        //    MainMenuButtons.blocksRaycasts = false;
+        //    Phone.alpha = 1.0f;
+        //    Phone.interactable = true;
+        //    Phone.blocksRaycasts = true;
+        //}
+        //else
+        //{
+        //    MainMenuButtons.alpha = 1f;
+        //    MainMenuButtons.interactable = true;
+        //    MainMenuButtons.blocksRaycasts = true;
+        //    Phone.alpha = 0f;
+        //    Phone.interactable = false;
+        //    Phone.blocksRaycasts = false;
+        //}
     }
 
 }
