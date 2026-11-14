@@ -17,7 +17,9 @@ public static class SaveSystem
         public string lastTaskDescription;
         public string timestamp;
         public string pendingJobNumber = "";
-        public string lastSceneName = ""; // ← НОВОЕ: Имя последней сцены
+        public string lastSceneName = "";
+        public float playTimeSeconds = 0f; // ← НОВОЕ: накопленное игровое время
+        public int moneyCount = 0; // ← НОВОЕ: количество денег (заглушка)
     }
 
     [Serializable]
@@ -59,14 +61,21 @@ public static class SaveSystem
         File.WriteAllText(FilePath, json);
     }
 
-    // Добавлен параметр lastSceneName
-    public static int CreateNewSlot(string taskTitle, string taskDescription = "", string pendingJobNumber = "", string lastSceneName = "Квартирка")
+    // Перенумерация слотов (вызывается после удаления/сдвига)
+    private static void RenumberSlots()
+    {
+        for (int i = 0; i < Container.slots.Count; i++)
+            Container.slots[i].slotIndex = i + 1;
+    }
+
+    public static int CreateNewSlot(string taskTitle, string taskDescription = "",
+    string pendingJobNumber = "", string lastSceneName = "Квартирка",
+    float playTimeSeconds = 0f, int moneyCount = 0)
     {
         if (Container.slots.Count >= MAX_SLOTS)
             Container.slots.RemoveAt(0);
 
-        for (int i = 0; i < Container.slots.Count; i++)
-            Container.slots[i].slotIndex = i + 1;
+        RenumberSlots();
 
         int newIndex = Container.slots.Count + 1;
         var slot = new SaveSlotData
@@ -76,7 +85,9 @@ public static class SaveSystem
             lastTaskTitle = taskTitle,
             lastTaskDescription = taskDescription,
             pendingJobNumber = pendingJobNumber,
-            lastSceneName = lastSceneName, // ← НОВОЕ
+            lastSceneName = lastSceneName,
+            moneyCount = moneyCount,
+            playTimeSeconds = playTimeSeconds, // ← НОВОЕ
             timestamp = DateTime.Now.ToString("dd.MM.yyyy HH:mm")
         };
         Container.slots.Add(slot);
@@ -85,8 +96,9 @@ public static class SaveSystem
         return newIndex;
     }
 
-    // Добавлен параметр lastSceneName
-    public static void UpdateSlot(int slotIndex, int taskIndex, string taskTitle, string taskDescription = "", string pendingJobNumber = null, string lastSceneName = null)
+    public static void UpdateSlot(int slotIndex, int taskIndex, string taskTitle,
+        string taskDescription = "", string pendingJobNumber = null,
+        string lastSceneName = null, int? moneyCount = null, float? playTimeSeconds = null)
     {
         var slot = Container.slots.Find(s => s.slotIndex == slotIndex);
         if (slot != null)
@@ -94,13 +106,14 @@ public static class SaveSystem
             slot.currentTaskIndex = taskIndex;
             slot.lastTaskTitle = taskTitle;
             slot.lastTaskDescription = taskDescription;
-
             if (pendingJobNumber != null)
                 slot.pendingJobNumber = pendingJobNumber;
-
-            if (lastSceneName != null) // ← НОВОЕ: обновляем сцену, только если она передана
+            if (lastSceneName != null)
                 slot.lastSceneName = lastSceneName;
-
+            if (moneyCount.HasValue)
+                slot.moneyCount = moneyCount.Value;
+            if (playTimeSeconds.HasValue) // ← НОВОЕ
+                slot.playTimeSeconds = playTimeSeconds.Value;
             slot.timestamp = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
             SaveToFile();
         }
@@ -120,9 +133,9 @@ public static class SaveSystem
     public static void DeleteSlot(int slotIndex)
     {
         Container.slots.RemoveAll(s => s.slotIndex == slotIndex);
-        for (int i = 0; i < Container.slots.Count; i++)
-            Container.slots[i].slotIndex = i + 1;
+        RenumberSlots(); // ← перестройка нумерации
         SaveToFile();
+        Debug.Log($"[SaveSystem] Удален слот #{slotIndex}, нумерация перестроена");
     }
 
     public static int SlotCount => Container.slots.Count;
@@ -138,8 +151,8 @@ public static class SaveSystem
         if (Container.slots.Count > 0)
         {
             var last = Container.slots[Container.slots.Count - 1];
-            // Передаем null для lastSceneName, чтобы не затирать её при простом сохранении прогресса задачи
-            UpdateSlot(last.slotIndex, currentTaskIndex, last.lastTaskTitle, last.lastTaskDescription, last.pendingJobNumber, null);
+            UpdateSlot(last.slotIndex, currentTaskIndex, last.lastTaskTitle,
+                last.lastTaskDescription, last.pendingJobNumber, null, null);
         }
     }
 
@@ -147,8 +160,17 @@ public static class SaveSystem
     {
         if (Container.slots.Count == 0) return;
         var last = Container.slots[Container.slots.Count - 1];
-        // Аналогично, не трогаем lastSceneName
-        UpdateSlot(last.slotIndex, last.currentTaskIndex, last.lastTaskTitle, last.lastTaskDescription, pendingJobNumber, null);
+        UpdateSlot(last.slotIndex, last.currentTaskIndex, last.lastTaskTitle,
+            last.lastTaskDescription, pendingJobNumber, null, null);
+    }
+
+    // ← НОВОЕ: сохранить деньги в последний слот
+    public static void SaveMoney(int moneyCount)
+    {
+        if (Container.slots.Count == 0) return;
+        var last = Container.slots[Container.slots.Count - 1];
+        UpdateSlot(last.slotIndex, last.currentTaskIndex, last.lastTaskTitle,
+            last.lastTaskDescription, last.pendingJobNumber, null, moneyCount);
     }
 
     public static string LoadPendingJobNumber()
@@ -161,5 +183,37 @@ public static class SaveSystem
     {
         var slot = Container.slots.Find(s => s.slotIndex == slotIndex);
         return slot?.pendingJobNumber ?? "";
+    }
+
+    public static void SaveMoney(int slotIndex, int money)
+    {
+        var slot = Container.slots.Find(s => s.slotIndex == slotIndex);
+        if (slot != null)
+        {
+            slot.moneyCount = money;
+            SaveToFile();
+        }
+    }
+
+    public static int LoadMoney(int slotIndex)
+    {
+        var slot = Container.slots.Find(s => s.slotIndex == slotIndex);
+        return slot?.moneyCount ?? 0;
+    }
+
+    public static void SavePlayTime(int slotIndex, float seconds)
+    {
+        var slot = Container.slots.Find(s => s.slotIndex == slotIndex);
+        if (slot != null)
+        {
+            slot.playTimeSeconds = Mathf.Max(0f, seconds);
+            SaveToFile();
+        }
+    }
+
+    public static float LoadPlayTime(int slotIndex)
+    {
+        var slot = Container.slots.Find(s => s.slotIndex == slotIndex);
+        return slot?.playTimeSeconds ?? 0f;
     }
 }

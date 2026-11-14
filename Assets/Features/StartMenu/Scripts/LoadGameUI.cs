@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using System.Collections.Generic;
 
 public class LoadGameUI : MonoBehaviour
@@ -20,7 +18,6 @@ public class LoadGameUI : MonoBehaviour
     public void RefreshSlots()
     {
         ClearSlots();
-
         var allSlots = SaveSystem.GetAllSlots();
 
         if (allSlots.Count == 0)
@@ -37,23 +34,16 @@ public class LoadGameUI : MonoBehaviour
             var slotData = allSlots[i];
             GameObject slotInstance = Instantiate(saveSlotPrefab, slotsContainer);
 
-            // Настраиваем тексты по именам
-            var texts = slotInstance.GetComponentsInChildren<TextMeshProUGUI>();
-            foreach (var text in texts)
+            // Используем компонент SaveSlotUI вместо ручного поиска по именам
+            var slotUI = slotInstance.GetComponent<SaveSlotUI>();
+            if (slotUI != null)
             {
-                if (text.name.Contains("Slot") || text.name.Contains("Number"))
-                    text.text = $"СОХРАНЕНИЕ {slotData.slotIndex}";
-                else if (text.name.Contains("Last") || text.name.Contains("Task"))
-                    text.text = $"{slotData.lastTaskTitle}";
+                slotUI.Initialize(slotData, OnSlotClicked, OnSlotDeleted);
             }
-
-            // Кнопка загрузки
-            var buttons = slotInstance.GetComponentsInChildren<Button>();
-            foreach (var btn in buttons)
+            else
             {
-                int slotNum = slotData.slotIndex;
-                btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(() => OnSlotClicked(slotNum));
+                Debug.LogWarning($"[LoadGameUI] На префабе {saveSlotPrefab.name} " +
+                                 "не найден компонент SaveSlotUI");
             }
 
             _activeSlots.Add(slotInstance);
@@ -65,8 +55,19 @@ public class LoadGameUI : MonoBehaviour
         var slotData = SaveSystem.LoadSlot(slotNumber);
         if (slotData != null)
         {
+            // ← НОВОЕ: восстановить накопленное время
+            if (GameTimeTracker.Instance != null)
+                GameTimeTracker.Instance.LoadFromSlot(slotData.playTimeSeconds);
+
             TaskManager.LoadFromSlot(slotData);
         }
+    }
+
+    // ← НОВОЕ: обработчик удаления
+    private void OnSlotDeleted(int slotIndex)
+    {
+        SaveSystem.DeleteSlot(slotIndex); // удаляет + перестраивает нумерацию
+        RefreshSlots();                   // обновляет UI
     }
 
     private void ClearSlots()

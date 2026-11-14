@@ -5,10 +5,14 @@ using TMPro;
 public class SaveSlotUI : MonoBehaviour
 {
     [Header("UI Элементы")]
-    [SerializeField] private TextMeshProUGUI slotNumberText;  // "СОХРАНЕНИЕ 1"
-    [SerializeField] private TextMeshProUGUI lastTaskText;    // "НАЗВАНИЕ ПОСЛЕДНЕЙ ЗАДАЧИ"
-    [SerializeField] private Button loadButton;               // Кнопка загрузки
-    [SerializeField] private Button deleteButton;             // Кнопка удаления (опционально)
+    [SerializeField] private TextMeshProUGUI timerText; // объект "Timer"
+    [SerializeField] private TextMeshProUGUI slotNumberText;   // "СОХРАНЕНИЕ 1"
+    [SerializeField] private TextMeshProUGUI lastTaskLabel;    // "Последнее задание:" (фиксированное)
+    [SerializeField] private TextMeshProUGUI lastTaskText;     // название задачи (динамическое)
+    [SerializeField] private TextMeshProUGUI moneyLabel;       // "Количество денег:" (фиксированное)
+    [SerializeField] private TextMeshProUGUI moneyText;        // значение денег (динамическое)
+    [SerializeField] private Button loadButton;
+    [SerializeField] private Button deleteButton;
 
     private SaveSystem.SaveSlotData _slotData;
     private System.Action<int> _onLoadClicked;
@@ -25,25 +29,37 @@ public class SaveSlotUI : MonoBehaviour
         _onLoadClicked = onLoad;
         _onDeleteClicked = onDelete;
 
-        // Отображаем номер слота
-        slotNumberText.text = $"СОХРАНЕНИЕ {data.slotIndex}";
+        // Номер слота
+        if (slotNumberText != null)
+            slotNumberText.text = $"СОХРАНЕНИЕ {data.slotIndex}";
 
-        // Отображаем название последней задачи
-        // Если задача завершена (индекс >= кол-ва задач), показываем "Все задачи выполнены"
+        // Фиксированные лейблы
+        if (lastTaskLabel != null)
+            lastTaskLabel.text = "Последнее задание:";
+        if (moneyLabel != null)
+            moneyLabel.text = "Количество денег:";
+        // Таймер
+        if (timerText != null)
+            timerText.text = GameTimeTracker.FormatTime(data.playTimeSeconds);
+
+        // Динамические значения
         string taskDisplay = string.IsNullOrEmpty(data.lastTaskTitle)
             ? "Нет данных"
             : data.lastTaskTitle;
+        if (lastTaskText != null)
+            lastTaskText.text = taskDisplay;
 
-        // Можно добавить индекс для наглядности (как на скриншоте)
-        lastTaskText.text = $"{taskDisplay}";
+        if (moneyText != null)
+            moneyText.text = $"{data.moneyCount}$";
 
-        // Подписываем кнопки
+        // Кнопка загрузки
         if (loadButton != null)
         {
             loadButton.onClick.RemoveAllListeners();
             loadButton.onClick.AddListener(() => _onLoadClicked?.Invoke(data.slotIndex));
         }
 
+        // Кнопка удаления (скрывается, если делегат не передан)
         if (deleteButton != null)
         {
             deleteButton.gameObject.SetActive(onDelete != null);
@@ -52,8 +68,5 @@ public class SaveSlotUI : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Возвращает данные слота (на случай если нужны).
-    /// </summary>
     public SaveSystem.SaveSlotData GetSlotData() => _slotData;
 }

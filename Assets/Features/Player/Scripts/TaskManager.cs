@@ -20,7 +20,6 @@ public class TaskManager : MonoBehaviour
     private int currentTaskIndex = 0;
     private bool isPanelMoving = false;
     private bool isPanelHidden = false;
-
     private Vector3 visiblePos;
     private Vector3 hiddenPos;
     private Vector3 animStartPos;
@@ -30,6 +29,9 @@ public class TaskManager : MonoBehaviour
 
     private static int _activeSlotIndex = 0;
     private static TaskManager _instance;
+
+    // ← НОВОЕ: заглушка денег
+    private static int _money = 0;
 
     [System.Serializable]
     public class TaskData
@@ -47,16 +49,21 @@ public class TaskManager : MonoBehaviour
     };
 
     public static event System.Action ProgressChanged;
+
     private static int _liveProgress = -1;
     private static string _pendingJobNumber = "";
 
     public static int Progress => _liveProgress >= 0 ? _liveProgress : SaveSystem.LoadTaskProgress();
+
+    // ← НОВОЕ: публичный доступ к деньгам (для тестов и будущего UI)
+    public static int Money => _money;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetOnPlay()
     {
         _liveProgress = -1;
         _activeSlotIndex = 0;
+        _money = 0; // ← НОВОЕ: сброс денег при старте
         ProgressChanged = null;
     }
 
@@ -78,7 +85,6 @@ public class TaskManager : MonoBehaviour
         {
             currentTaskIndex = _liveProgress;
             Debug.Log($"[TaskManager] Загружено из слота #{_activeSlotIndex}, задача #{currentTaskIndex}, работа: '{_pendingJobNumber}'");
-
             if (!string.IsNullOrEmpty(_pendingJobNumber) && currentTaskIndex >= 1 && currentTaskIndex < 3)
             {
                 RestorePendingJob();
@@ -90,7 +96,6 @@ public class TaskManager : MonoBehaviour
             _liveProgress = currentTaskIndex;
             _pendingJobNumber = SaveSystem.LoadPendingJobNumber();
             Debug.Log($"[TaskManager] Загружен номер работы: '{_pendingJobNumber}'");
-
             if (!string.IsNullOrEmpty(_pendingJobNumber) && currentTaskIndex >= 1 && currentTaskIndex < 3)
             {
                 RestorePendingJob();
@@ -118,26 +123,26 @@ public class TaskManager : MonoBehaviour
         }
     }
 
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════
     //  НОВАЯ ИГРА
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════
     public static void StartNewGame()
     {
         string title = DefaultTasks.Length > 0 ? DefaultTasks[0].title : "Новая игра";
         string desc = DefaultTasks.Length > 0 ? DefaultTasks[0].description : "";
 
-        // При новой игре стартовая сцена всегда "Квартирка"
         _activeSlotIndex = SaveSystem.CreateNewSlot(title, desc, "", "Квартирка");
-
         _liveProgress = 0;
+        _money = 0; // ← НОВОЕ: сброс денег при новой игре
+
         ProgressChanged?.Invoke();
         Debug.Log($"[TaskManager] Новая игра. Слот #{_activeSlotIndex}");
         SceneManager.LoadScene("Квартирка");
     }
 
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════
     //  ЗАГРУЗКА ИЗ СЛОТА
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════
     public static void LoadFromSlot(SaveSystem.SaveSlotData slotData)
     {
         if (slotData == null) return;
@@ -146,17 +151,27 @@ public class TaskManager : MonoBehaviour
         _liveProgress = slotData.currentTaskIndex;
         _pendingJobNumber = slotData.pendingJobNumber ?? "";
 
-        ProgressChanged?.Invoke();
-        Debug.Log($"[TaskManager] Загрузка слота #{slotData.slotIndex} | Задача: {slotData.currentTaskIndex} | Работа: '{_pendingJobNumber}' | Сцена: '{slotData.lastSceneName}'");
+        // ← НОВОЕ: загружаем деньги и время
+        _money = slotData.moneyCount;
 
-        // Защита от старых сохранений, где lastSceneName может быть пустым
+        if (GameTimeTracker.Instance != null)
+            GameTimeTracker.Instance.LoadFromSlot(slotData.playTimeSeconds);
+
+        ProgressChanged?.Invoke();
+        Debug.Log($"[TaskManager] Загрузка слота #{slotData.slotIndex} | " +
+                  $"Задача: {slotData.currentTaskIndex} | " +
+                  $"Работа: '{_pendingJobNumber}' | " +
+                  $"Сцена: '{slotData.lastSceneName}' | " +
+                  $"Деньги: {_money}$ | " +
+                  $"Время: {GameTimeTracker.FormatTime(slotData.playTimeSeconds)}");
+
         string sceneToLoad = string.IsNullOrEmpty(slotData.lastSceneName) ? "Квартирка" : slotData.lastSceneName;
         SceneManager.LoadScene(sceneToLoad);
     }
 
-    // ═══════════════════════════════════════════
-    //  Сохранение выбранной работы и сцены
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════
+    //  Сохранение прогресса (задачи + сцена + время + деньги)
+    // ═══════════════════════════════════════
     public void SaveCurrentProgress()
     {
         if (_activeSlotIndex <= 0)
@@ -171,19 +186,25 @@ public class TaskManager : MonoBehaviour
         string taskDesc = (progressToSave < tasks.Length)
             ? tasks[progressToSave].description : "";
 
-        // Получаем имя текущей сцены
         string currentSceneName = SceneManager.GetActiveScene().name;
 
-        // ВАЖНО: Если игрок сейчас в меню, мы НЕ сохраняем "Menu" как последнюю сцену,
-        // чтобы при загрузке он вернулся в игровой мир, а не в меню.
         if (currentSceneName == "Menu")
         {
-            SaveSystem.UpdateSlot(_activeSlotIndex, progressToSave, taskTitle, taskDesc, _pendingJobNumber, null);
+            SaveSystem.UpdateSlot(_activeSlotIndex, progressToSave, taskTitle, taskDesc,
+                _pendingJobNumber, null);
         }
         else
         {
-            SaveSystem.UpdateSlot(_activeSlotIndex, progressToSave, taskTitle, taskDesc, _pendingJobNumber, currentSceneName);
+            SaveSystem.UpdateSlot(_activeSlotIndex, progressToSave, taskTitle, taskDesc,
+                _pendingJobNumber, currentSceneName);
         }
+
+        // ← НОВОЕ: сохраняем время и деньги в тот же слот
+        SaveSystem.SavePlayTime(_activeSlotIndex,
+            GameTimeTracker.Instance != null ? GameTimeTracker.Instance.GetSeconds() : 0f);
+        SaveSystem.SaveMoney(_activeSlotIndex, _money);
+
+        Debug.Log($"[TaskManager] Сохранено: время={GameTimeTracker.FormatTime(GameTimeTracker.Instance != null ? GameTimeTracker.Instance.GetSeconds() : 0f)}, деньги={_money}$");
     }
 
     public static void ExitToMenu()
@@ -227,7 +248,6 @@ public class TaskManager : MonoBehaviour
         taskTitle.text = task.title;
         taskTitle.color = Color.gold;
         taskTitle.fontStyle = FontStyles.Normal;
-
         taskDescription.text = task.description.Trim();
         taskDescription.color = Color.white;
         taskDescription.fontStyle = FontStyles.Normal;
@@ -268,6 +288,7 @@ public class TaskManager : MonoBehaviour
         ShowCurrentTask();
     }
 
+    // ← НОВОЕ: при выходе из игры сохраняем всё
     private void OnApplicationQuit()
     {
         SaveCurrentProgress();
@@ -290,7 +311,6 @@ public class TaskManager : MonoBehaviour
         {
             callApp = FindObjectOfType<GamePhone.Apps.CallApp>(true);
         }
-
         if (callApp == null)
         {
             Debug.LogWarning("[TaskManager] CallApp не найден даже через FindObjectOfType(true)");
@@ -299,7 +319,6 @@ public class TaskManager : MonoBehaviour
 
         var field = typeof(GamePhone.Apps.CallApp).GetField("_knownNumbers",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
         if (field == null)
         {
             Debug.LogWarning("[TaskManager] Не удалось получить _knownNumbers");
@@ -321,6 +340,29 @@ public class TaskManager : MonoBehaviour
                 return;
             }
         }
+
         Debug.LogWarning($"[TaskManager] Работа '{_pendingJobNumber}' не найдена");
+    }
+
+    // ═══════════════════════════════════════
+    //  НОВОЕ: методы-заглушки для управления деньгами
+    // ═══════════════════════════════════════
+
+    /// <summary>
+    /// Добавить/списать деньги (отрицательное значение — списание).
+    /// </summary>
+    public static void AddMoney(int amount)
+    {
+        _money += amount;
+        Debug.Log($"[TaskManager] Деньги: {_money}$ ({(amount >= 0 ? "+" : "")}{amount})");
+    }
+
+    /// <summary>
+    /// Установить точную сумму денег.
+    /// </summary>
+    public static void SetMoney(int amount)
+    {
+        _money = Mathf.Max(0, amount);
+        Debug.Log($"[TaskManager] Деньги установлены: {_money}$");
     }
 }
