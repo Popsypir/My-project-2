@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public static class SaveSystem
 {
     private const string SAVE_FILE_NAME = "saves.json";
-    private const int MAX_SLOTS = 20;
+    private const int MAX_SLOTS = 6;
 
     [Serializable]
     public class SaveSlotData
@@ -66,6 +66,11 @@ public static class SaveSystem
     {
         for (int i = 0; i < Container.slots.Count; i++)
             Container.slots[i].slotIndex = i + 1;
+    }
+
+    public static int CountSlots()
+    {
+        return Container.slots.Count;
     }
 
     public static int CreateNewSlot(string taskTitle, string taskDescription = "",

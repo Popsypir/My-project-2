@@ -16,6 +16,8 @@ public class StartGameApp : MonoBehaviour
     [SerializeField] private OpenMenu Openmenu;
     [SerializeField] private CanvasGroup MainMenuButtons;
 
+    [SerializeField] private CanvasGroup LimitSaveWarning;
+
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape) && Openmenu.getIndex() == 0)
@@ -26,28 +28,46 @@ public class StartGameApp : MonoBehaviour
         }
     }
 
+    public void HideWarning()
+    {
+        LimitSaveWarning.alpha = 0;
+        LimitSaveWarning.interactable = false;
+        LimitSaveWarning.blocksRaycasts = false;
+    }
+
     public void LoadLocationByName(string sceneName)
     {
-        string target = string.IsNullOrWhiteSpace(sceneName) ? targetSceneName : sceneName;
-
-        TaskManager.StartNewGame();
-
-        if (string.IsNullOrWhiteSpace(target))
+        if (SaveSystem.CountSlots() == 6)
         {
-            Debug.LogError($"[StartGameApp] > Имя сцены не указано!");
-            return;
-        }
-
-        if (ScreenFader.Instance != null)
-        {
-            StartCoroutine(LoadWithFade(target));
+            LimitSaveWarning.alpha = 1;
+            LimitSaveWarning.interactable = true;
+            LimitSaveWarning.blocksRaycasts = true;
         }
 
         else
         {
-            Debug.Log($"[StartGameApp] > ScreenFader не найден.");
-            SceneManager.LoadScene(target);
+            string target = string.IsNullOrWhiteSpace(sceneName) ? targetSceneName : sceneName;
+
+            TaskManager.StartNewGame();
+
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                Debug.LogError($"[StartGameApp] > Имя сцены не указано!");
+                return;
+            }
+
+            if (ScreenFader.Instance != null)
+            {
+                StartCoroutine(LoadWithFade(target));
+            }
+
+            else
+            {
+                Debug.Log($"[StartGameApp] > ScreenFader не найден.");
+                SceneManager.LoadScene(target);
+            }
         }
+
     }
 
     private IEnumerator LoadWithFade(string sceneName)

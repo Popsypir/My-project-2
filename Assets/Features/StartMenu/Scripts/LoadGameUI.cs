@@ -66,6 +66,11 @@ public class LoadGameUI : MonoBehaviour
     // ← НОВОЕ: обработчик удаления
     private void OnSlotDeleted(int slotIndex)
     {
+        DeleteSaveConfirmDialog.Instance.Show(slotIndex);
+    }
+
+    public void DeleteSlot(int slotIndex)
+    {
         SaveSystem.DeleteSlot(slotIndex); // удаляет + перестраивает нумерацию
         RefreshSlots();                   // обновляет UI
     }
